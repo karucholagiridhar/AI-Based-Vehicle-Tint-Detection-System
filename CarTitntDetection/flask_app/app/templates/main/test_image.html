@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block title %}Test Image - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 48px 24px;">
+    <!-- Page Header -->
+    <div class="page-header" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%); padding: 32px; border-radius: 20px; margin-bottom: 48px; border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+            <div style="width: 56px; height: 56px; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);">📷</div>
+            <div>
+                <h1 class="page-header__title" style="font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0; letter-spacing: -1px;">Image Test</h1>
+                <p class="page-header__description" style="color: var(--text-secondary); font-size: 1.0625rem; margin: 8px 0 0 0;">Upload an image to detect tinted windows with AI-powered analysis</p>
+            </div>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+            <span style="background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); padding: 6px 14px; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.3);">✨ AI Detection</span>
+            <span style="background: rgba(34, 197, 94, 0.1); color: var(--accent-success); padding: 6px 14px; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; border: 1px solid rgba(34, 197, 94, 0.3);">⚡ Fast Processing</span>
+            <span style="background: rgba(168, 85, 247, 0.1); color: var(--accent-secondary); padding: 6px 14px; border-radius: 8px; font-size: 0.8125rem; font-weight: 600; border: 1px solid rgba(168, 85, 247, 0.3);">🎯 High Accuracy</span>
+        </div>
+    </div>
+
+    <div class="grid grid-2" style="gap: 32px;">
+        <!-- Upload Area -->
+        <div>
+            <div class="card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(168, 85, 247, 0.03) 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 32px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);">
+                <h2 style="background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 1.5rem; font-weight: 700; margin-bottom: 28px; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">📤</div>
+                    <span>Upload Image</span>
+                </h2>
+                
+                <form id="imageForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea" role="button" tabindex="0" aria-label="Upload image file" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%); border: 3px dashed rgba(59, 130, 246, 0.4); border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;" onmouseover="this.style.borderColor='rgba(59, 130, 246, 0.7)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%)'; this.style.transform='scale(1.02)';" onmouseout="this.style.borderColor='rgba(59, 130, 246, 0.4)'; this.style.background='linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(168, 85, 247, 0.05) 100%)'; this.style.transform='scale(1)';">
+                        <div style="position: absolute; top: -40px; right: -40px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                        <div class="upload-icon" style="font-size: 4rem; margin-bottom: 20px; filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.4));">📸</div>
+                        <p class="upload-text" style="color: var(--text-primary); font-size: 1.125rem; margin-bottom: 8px;"><strong style="background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Click to upload or drag image here</strong></p>
+                        <p class="upload-hint" style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">Supported formats: JPG, PNG, WEBP | Maximum size: 500MB</p>
+                        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(59, 130, 246, 0.1); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            <span style="color: var(--accent-primary); font-size: 0.8125rem; font-weight: 600;">📁 Browse Files</span>
+                        </div>
+                        <input 
+                            type="file" 
+                            id="imageInput" 
+                            name="image" 
+                            accept="image/*" 
+                            style="display: none;"
+                            aria-label="Image file input"
+                        >
+                    </div>
+
+                    <!-- Vehicle Number Plate Input -->
+                    <div class="form-group" style="margin-top: 28px; background: rgba(0, 0, 0, 0.2); padding: 20px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <label for="vehicleNumberPlate" class="form-label" style="display: flex; align-items: center; gap: 10px; color: var(--text-primary); font-weight: 700; margin-bottom: 12px; font-size: 1rem;">
+                            <span style="font-size: 1.25rem;">🚗</span>
+                            <span>Vehicle Number Plate (Optional)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="vehicleNumberPlate" 
+                            name="vehicleNumberPlate"
+                            class="form-input" 
+                            placeholder="e.g., AP09AB1234"
+                            maxlength="15"
+                            style="text-transform: uppercase; font-weight: 600; letter-spacing: 1.5px; background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(59, 130, 246, 0.3); padding: 14px 18px; border-radius: 12px; font-size: 1rem; transition: all 0.3s ease;"
+                            aria-label="Vehicle number plate input"
+                            onfocus="this.style.borderColor='rgba(59, 130, 246, 0.7)'; this.style.boxShadow='0 0 0 4px rgba(59, 130, 246, 0.1)';"
+                            onblur="this.style.borderColor='rgba(59, 130, 246, 0.3)'; this.style.boxShadow='none';"
+                        >
+                        <p id="plateValidationMsg" style="font-size: 0.8125rem; margin-top: 8px; display: none; font-weight: 600;"></p>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 8px; display: flex; align-items: center; gap: 6px;">
+                            <span>ℹ️</span>
+                            <span>Enter the vehicle registration number (alphanumeric, uppercase)</span>
+                        </p>
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary btn-lg btn-block" 
+                        style="margin-top: 28px; padding: 16px; font-size: 1.125rem; font-weight: 700; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); border: none; box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;"
+                        id="submitBtn"
+                        aria-label="Analyze uploaded image"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 32px rgba(59, 130, 246, 0.5)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(59, 130, 246, 0.4)';"
+                    >
+                        <span style="position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span style="font-size: 1.25rem;">🔍</span>
+                            <span>Analyze Image</span>
+                        </span>
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); animation: shimmer 2s infinite;"></div>
+                    </button>
+                </form>
+
+                <!-- Preview -->
+                <div id="preview" class="image-preview hidden" style="margin-top: 28px; background: rgba(0, 0, 0, 0.3); padding: 16px; border-radius: 16px; border: 2px solid rgba(59, 130, 246, 0.3);">
+                    <img id="previewImg" src="" alt="Preview of uploaded image" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);">
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div>
+            <!-- Results Card -->
+            <div class="result-card" id="resultsCard" style="display: none; background: linear-gradient(135deg, rgba(34, 197, 94, 0.03) 0%, rgba(59, 130, 246, 0.03) 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 32px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);">
+                <div class="result-card__header" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 14px; padding: 20px; margin-bottom: 28px; display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 48px; height: 48px; background: var(--gradient-success); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);">✅</div>
+                    <h2 style="margin: 0; font-size: 1.5rem; font-weight: 700; background: var(--gradient-success); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Analysis Results</h2>
+                </div>
+                
+                <div id="results">
+                    <div class="result-metric" style="background: rgba(0, 0, 0, 0.2); padding: 24px; border-radius: 14px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <label class="result-metric__label" style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: block;">Windows Detected</label>
+                        <p class="result-metric__value" id="resultWindows" style="font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 0; line-height: 1;">0</p>
+                    </div>
+
+                    <div class="result-split" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                        <div class="result-split__item result-split__item--tinted" style="background: linear-gradient(135deg, rgba(255, 0, 255, 0.1) 0%, rgba(255, 0, 255, 0.05) 100%); border: 1px solid rgba(255, 0, 255, 0.3); border-radius: 14px; padding: 20px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 8px 24px rgba(255, 0, 255, 0.3)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                            <div class="result-split__label" style="color: var(--text-muted); font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Tinted</div>
+                            <div class="result-split__value result-split__value--tinted" id="resultTinted" style="font-size: 2.25rem; font-weight: 800; color: #ff00ff; filter: drop-shadow(0 2px 8px rgba(255, 0, 255, 0.4));">0</div>
+                        </div>
+
+                        <div class="result-split__item result-split__item--clear" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 14px; padding: 20px; text-align: center; transition: all 0.3s ease;" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 8px 24px rgba(59, 130, 246, 0.3)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+                            <div class="result-split__label" style="color: var(--text-muted); font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Clear</div>
+                            <div class="result-split__value result-split__value--clear" id="resultClear" style="font-size: 2.25rem; font-weight: 800; color: var(--accent-primary); filter: drop-shadow(0 2px 8px rgba(59, 130, 246, 0.4));">0</div>
+                        </div>
+                    </div>
+
+                    <div class="result-metric" style="background: rgba(0, 0, 0, 0.2); padding: 24px; border-radius: 14px; margin-bottom: 20px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <label class="result-metric__label" style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; display: block;">Confidence Level</label>
+                        <div class="progress" style="height: 14px; border-radius: 14px; background: rgba(34, 197, 94, 0.1); overflow: hidden; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); margin-bottom: 12px;">
+                            <div class="progress-bar" id="resultConfidence" style="width: 0%; background: var(--gradient-success); border-radius: 14px; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); animation: shimmer 2s infinite;"></div>
+                            </div>
+                        </div>
+                        <p style="color: var(--accent-success); font-weight: 800; font-size: 1.5rem; margin: 0; text-align: center; filter: drop-shadow(0 2px 8px rgba(34, 197, 94, 0.4));" id="resultConfidencePercent">0%</p>
+                    </div>
+
+                    <div class="result-metric" style="background: rgba(0, 0, 0, 0.2); padding: 24px; border-radius: 14px; margin-bottom: 0; border: 1px solid rgba(255, 255, 255, 0.05); text-align: center;">
+                        <label class="result-metric__label" style="color: var(--text-secondary); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: block;">Processing Time</label>
+                        <p style="color: var(--text-primary); font-size: 1.75rem; font-weight: 700; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;" id="resultTime">
+                            <span style="font-size: 1.5rem;">⏱️</span>
+                            <span>0s</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div id="outputImageContainer" style="margin-top: 32px; background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                    <p style="color: var(--text-muted); font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        <span>🖼️</span>
+                        <span>Output Image</span>
+                    </p>
+                    <img id="outputImage" src="" alt="Analysis output image" style="width: 100%; border-radius: 12px; border: 2px solid rgba(34, 197, 94, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);">
+                </div>
+
+                <a id="downloadLink" href="#" download class="btn btn-secondary btn-block" style="margin-top: 24px; padding: 14px; font-size: 1rem; font-weight: 700; border-radius: 12px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 24px rgba(0, 0, 0, 0.3)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    <span style="font-size: 1.25rem;">⬇️</span>
+                    <span>Download Result</span>
+                </a>
+            </div>
+
+            <!-- Loading Card -->
+            <div class="loading-card" id="loadingCard" style="display: none; background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(168, 85, 247, 0.03) 100%); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 48px 32px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); text-align: center;">
+                <div class="loading-card__spinner" style="width: 64px; height: 64px; border: 4px solid rgba(59, 130, 246, 0.2); border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 24px;"></div>
+                <p class="loading-card__text" style="color: var(--text-primary); font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Analyzing image...</p>
+                <p class="loading-card__subtext" style="color: var(--text-muted); font-size: 0.9375rem;">This may take a few moments</p>
+                <div style="margin-top: 20px; display: flex; justify-content: center; gap: 6px;">
+                    <div style="width: 10px; height: 10px; background: #3b82f6; border-radius: 50%; animation: pulse 1.5s infinite; animation-delay: 0s;"></div>
+                    <div style="width: 10px; height: 10px; background: #a855f7; border-radius: 50%; animation: pulse 1.5s infinite; animation-delay: 0.3s;"></div>
+                    <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%; animation: pulse 1.5s infinite; animation-delay: 0.6s;"></div>
+                </div>
+            </div>
+
+            <!-- Error Card -->
+            <div class="error-card" id="errorCard" style="display: none; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%); border: 2px solid rgba(239, 68, 68, 0.3); border-radius: 20px; padding: 32px; box-shadow: 0 8px 32px rgba(239, 68, 68, 0.2);">
+                <div class="error-card__header" style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px; padding: 16px; background: rgba(239, 68, 68, 0.1); border-radius: 12px;">
+                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);">❌</div>
+                    <span style="font-size: 1.25rem; font-weight: 700; color: #ef4444;">Error</span>
+                </div>
+                <p class="error-card__message" id="errorMessage" style="color: var(--text-secondary); font-size: 1rem; line-height: 1.6; margin: 0;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.8); }
+    }
+</style>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const imageInput = document.getElementById('imageInput');
+const imageForm = document.getElementById('imageForm');
+const preview = document.getElementById('preview');
+const previewImg = document.getElementById('previewImg');
+const resultsCard = document.getElementById('resultsCard');
+const loadingCard = document.getElementById('loadingCard');
+const errorCard = document.getElementById('errorCard');
+const submitBtn = document.getElementById('submitBtn');
+const vehicleNumberPlate = document.getElementById('vehicleNumberPlate');
+const plateValidationMsg = document.getElementById('plateValidationMsg');
+
+// ============================================
+// VEHICLE NUMBER PLATE MANAGEMENT
+// Handles validation and localStorage persistence
+// ============================================
+
+/**
+ * Load saved vehicle number plate from localStorage on page load
+ */
+function loadSavedNumberPlate() {
+    const savedPlate = localStorage.getItem('vehicleNumberPlate');
+    if (savedPlate && vehicleNumberPlate) {
+        vehicleNumberPlate.value = savedPlate;
+    }
+}
+
+/**
+ * Validate vehicle number plate format
+ * Format: Alphanumeric, uppercase (e.g., AP09AB1234)
+ * @param {string} plate - The number plate to validate
+ * @returns {object} - {valid: boolean, message: string}
+ */
+function validateNumberPlate(plate) {
+    // If empty, it's valid (optional field)
+    if (!plate || plate.trim() === '') {
+        return { valid: true, message: '' };
+    }
+    
+    // Remove spaces and convert to uppercase
+    plate = plate.replace(/\s/g, '').toUpperCase();
+    
+    // Check if alphanumeric only (no special characters)
+    const alphanumericRegex = /^[A-Z0-9]+$/;
+    if (!alphanumericRegex.test(plate)) {
+        return { 
+            valid: false, 
+            message: '❌ Only letters and numbers allowed (no special characters)' 
+        };
+    }
+    
+    // Check minimum length (at least 4 characters)
+    if (plate.length < 4) {
+        return { 
+            valid: false, 
+            message: '❌ Number plate should be at least 4 characters' 
+        };
+    }
+    
+    // Check maximum length (max 15 characters)
+    if (plate.length > 15) {
+        return { 
+            valid: false, 
+            message: '❌ Number plate should not exceed 15 characters' 
+        };
+    }
+    
+    // Valid format
+    return { 
+        valid: true, 
+        message: '✅ Valid number plate format' 
+    };
+}
+
+/**
+ * Display validation message for number plate
+ * @param {boolean} valid - Whether the plate is valid
+ * @param {string} message - The message to display
+ */
+function showPlateValidation(valid, message) {
+    if (!message) {
+        plateValidationMsg.style.display = 'none';
+        return;
+    }
+    
+    plateValidationMsg.textContent = message;
+    plateValidationMsg.style.display = 'block';
+    plateValidationMsg.style.color = valid ? 'var(--accent-success)' : 'var(--accent-danger)';
+}
+
+/**
+ * Save vehicle number plate to localStorage
+ * @param {string} plate - The number plate to save
+ */
+function saveNumberPlate(plate) {
+    if (plate && plate.trim() !== '') {
+        // Store in uppercase, remove extra spaces
+        const cleanPlate = plate.replace(/\s/g, '').toUpperCase();
+        localStorage.setItem('vehicleNumberPlate', cleanPlate);
+        localStorage.setItem('vehicleNumberPlateTimestamp', new Date().toISOString());
+    } else {
+        // Clear if empty
+        localStorage.removeItem('vehicleNumberPlate');
+        localStorage.removeItem('vehicleNumberPlateTimestamp');
+    }
+}
+
+// Real-time validation as user types
+vehicleNumberPlate.addEventListener('input', function(e) {
+    // Auto-convert to uppercase
+    this.value = this.value.toUpperCase();
+    
+    // Validate on input
+    const validation = validateNumberPlate(this.value);
+    showPlateValidation(validation.valid, validation.message);
+});
+
+// Save to localStorage when user leaves the field
+vehicleNumberPlate.addEventListener('blur', function() {
+    const validation = validateNumberPlate(this.value);
+    if (validation.valid) {
+        saveNumberPlate(this.value);
+    }
+});
+
+// Load saved number plate on page load
+document.addEventListener('DOMContentLoaded', loadSavedNumberPlate);
+
+// ============================================
+// UPLOAD FUNCTIONALITY
+// ============================================
+
+// Upload area click
+uploadArea.addEventListener('click', () => imageInput.click());
+
+// Keyboard accessibility
+uploadArea.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        imageInput.click();
+    }
+});
+
+// Drag and drop
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    imageInput.files = e.dataTransfer.files;
+    handleImageSelect();
+});
+
+// File input change
+imageInput.addEventListener('change', handleImageSelect);
+
+function handleImageSelect() {
+    if (imageInput.files.length === 0) return;
+
+    const file = imageInput.files[0];
+
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        preview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+// Form submission
+imageForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (imageInput.files.length === 0) {
+        errorCard.style.display = 'block';
+        document.getElementById('errorMessage').textContent = 'Please select an image to analyze';
+        return;
+    }
+
+    // Validate number plate before submission
+    const plateValue = vehicleNumberPlate.value.trim();
+    const plateValidation = validateNumberPlate(plateValue);
+    
+    if (!plateValidation.valid) {
+        showPlateValidation(false, plateValidation.message);
+        vehicleNumberPlate.focus();
+        return;
+    }
+    
+    // Save number plate to localStorage if valid
+    if (plateValidation.valid && plateValue) {
+        saveNumberPlate(plateValue);
+    }
+
+    const formData = new FormData();
+    formData.append('image', imageInput.files[0]);
+
+    // Show loading
+    loadingCard.style.display = 'block';
+    resultsCard.style.display = 'none';
+    errorCard.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Analyzing...';
+
+    try {
+        const response = await fetch('{{ url_for("main.test_image") }}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Show message if any
+            if (data.message) {
+                if (window.App && window.App.toast) {
+                    window.App.toast.info(data.message);
+                } else {
+                    alert(data.message);
+                }
+            }
+            
+            // Update results
+            document.getElementById('resultWindows').textContent = data.windows_detected;
+            document.getElementById('resultTinted').textContent = data.tinted_windows;
+            document.getElementById('resultClear').textContent = data.clear_windows;
+            document.getElementById('resultConfidence').style.width = (data.average_confidence * 100) + '%';
+            document.getElementById('resultConfidencePercent').textContent = (data.average_confidence * 100).toFixed(1) + '%';
+            document.getElementById('resultTime').textContent = data.processing_time + 's';
+
+            // Update output image
+            document.getElementById('outputImage').src = data.output_path;
+            document.getElementById('downloadLink').href = data.output_path;
+
+            // Show results
+            loadingCard.style.display = 'none';
+            resultsCard.style.display = 'block';
+        } else {
+            throw new Error(data.error || 'An error occurred during analysis');
+        }
+    } catch (error) {
+        loadingCard.style.display = 'none';
+        errorCard.style.display = 'block';
+        document.getElementById('errorMessage').textContent = error.message;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🔍 Analyze Image';
+    }
+});
+</script>
+{% endblock %}

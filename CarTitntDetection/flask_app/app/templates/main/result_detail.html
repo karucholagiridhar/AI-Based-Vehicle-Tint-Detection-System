@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Result Details - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 20px;">
+    <!-- Breadcrumb -->
+    <div style="margin-bottom: 24px;">
+        <a href="{{ url_for('main.results') }}" style="color: var(--accent-green); text-decoration: none;">← Back to Results</a>
+    </div>
+
+    <!-- Page Header -->
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 2rem; color: var(--accent-green); margin-bottom: 8px;">
+            {% if result.test_type == 'image' %}📷{% elif result.test_type == 'video' %}🎬{% else %}📹{% endif %}
+            {{ result.original_filename }}
+        </h1>
+        <p style="color: var(--text-gray);">{{ result.created_at.strftime('%B %d, %Y at %H:%M:%S') }}</p>
+    </div>
+
+    <!-- Vehicle Details & Violation Summary Section -->
+    <div class="grid grid-2" style="margin-bottom: 24px;">
+        <!-- Vehicle Details Card -->
+        <div class="card" id="vehicleDetailsCard">
+            <h2 style="color: var(--accent-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <span>🚗</span>
+                <span>Vehicle Details</span>
+            </h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem; display: flex; align-items: center; gap: 6px;">
+                        <span>📋</span>
+                        <span>Number Plate</span>
+                    </label>
+                    <p id="vehicleNumberPlateDisplay" style="color: var(--text-light); font-size: 1.25rem; font-weight: 700; margin-top: 8px; letter-spacing: 2px; font-family: 'Courier New', monospace;">
+                        -- NOT PROVIDED --
+                    </p>
+                </div>
+
+                <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem; display: flex; align-items: center; gap: 6px;">
+                        <span>📅</span>
+                        <span>Detection Date</span>
+                    </label>
+                    <p style="color: var(--text-light); font-size: 1.1rem; margin-top: 4px;">{{ result.created_at.strftime('%B %d, %Y') }}</p>
+                </div>
+
+                <div>
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem; display: flex; align-items: center; gap: 6px;">
+                        <span>⏰</span>
+                        <span>Detection Time</span>
+                    </label>
+                    <p style="color: var(--text-light); font-size: 1.1rem; margin-top: 4px;">{{ result.created_at.strftime('%I:%M:%S %p') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Violation Summary Card -->
+        <div class="card" id="violationSummaryCard">
+            <h2 style="color: var(--accent-danger); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <span>⚖️</span>
+                <span>Violation Summary</span>
+            </h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Compliance Status Badge -->
+                <div style="text-align: center; padding: 20px; background: rgba(16, 185, 129, 0.1); border-radius: 12px; border: 2px solid var(--accent-success);" id="complianceStatusContainer">
+                    <div style="font-size: 3rem; margin-bottom: 8px;" id="complianceIcon">✅</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; margin-bottom: 4px;" id="complianceStatus">COMPLIANT</div>
+                    <div style="color: var(--text-muted); font-size: 0.9375rem;" id="complianceMessage">No violations detected</div>
+                </div>
+
+                <!-- Violation Details (shown only if violation exists) -->
+                <div id="violationDetails" style="display: none;">
+                    <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Violation Type</label>
+                        <p id="violationType" style="color: var(--accent-danger); font-size: 1.1rem; font-weight: 600; margin-top: 4px;">Illegal Window Tint</p>
+                    </div>
+
+                    <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Legal Reference</label>
+                        <p id="legalReference" style="color: var(--text-light); font-size: 0.9375rem; margin-top: 4px;">Motor Vehicles Act, 1988 - Section 100(2)</p>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">Use of tinted glass/films on vehicle windows</p>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Penalty Amount</label>
+                        <p id="penaltyAmount" style="color: var(--accent-danger); font-size: 1.5rem; font-weight: 700; margin-top: 4px;">₹ 2,000 - ₹ 5,000</p>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">May vary by state jurisdiction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- Info Card -->
+        <div class="card">
+            <h2 style="color: var(--accent-green); margin-bottom: 20px;">📊 Detection Summary</h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Test Type</label>
+                    <p style="color: var(--text-light); font-size: 1.1rem; margin-top: 4px;">
+                        {% if result.test_type == 'image' %}
+                            Image Analysis
+                        {% elif result.test_type == 'video' %}
+                            Video Analysis
+                        {% else %}
+                            Webcam Capture
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Windows Detected</label>
+                    <p style="color: var(--accent-green); font-size: 1.75rem; font-weight: 700; margin-top: 4px;">{{ result.windows_detected }}</p>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Tinted</label>
+                        <p style="color: var(--accent-magenta); font-size: 1.5rem; font-weight: 700; margin-top: 4px;">{{ result.tinted_windows }}</p>
+                    </div>
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Clear</label>
+                        <p style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 700; margin-top: 4px;">{{ result.clear_windows }}</p>
+                    </div>
+                </div>
+
+                <div style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Average Confidence</label>
+                    <div class="progress" style="margin-top: 8px; margin-bottom: 8px;">
+                        <div class="progress-bar" style="width: {{ result.average_confidence * 100 }}%;"></div>
+                    </div>
+                    <p style="color: var(--accent-green); font-weight: 600;">{{ "%.2f"|format(result.average_confidence * 100) }}%</p>
+                </div>
+
+                <div>
+                    <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Processing Time</label>
+                    <p style="color: var(--text-light); font-size: 1.1rem; margin-top: 4px;">{{ "%.2f"|format(result.processing_time) }} seconds</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Output Image -->
+        <div class="card">
+            <h2 style="color: var(--accent-green); margin-bottom: 20px;">🎨 Annotated Output</h2>
+            {% if result.output_path %}
+                <div style="background-color: var(--primary-darker); border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
+                    <img src="{{ url_for('main.get_image', filename=result.output_path.split('/')[-1]) }}" alt="Output" style="width: 100%; display: block;">
+                </div>
+                <a href="{{ url_for('main.get_image', filename=result.output_path.split('/')[-1]) }}" download class="btn btn-secondary btn-block">
+                    ⬇️ Download Output
+                </a>
+            {% else %}
+                <p style="color: var(--text-dark-gray); text-align: center; padding: 40px 20px;">
+                    Output image not available
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Predictions Table -->
+    {% if predictions %}
+        <div class="card" style="margin-top: 24px;">
+            <h2 style="color: var(--accent-green); margin-bottom: 20px;">🪟 Detected Windows</h2>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Class</th>
+                            <th>Confidence</th>
+                            <th>X Position</th>
+                            <th>Y Position</th>
+                            <th>Width</th>
+                            <th>Height</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in predictions %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    {% if pred.class == 'tinted' %}
+                                        <span class="badge badge-magenta">Tinted</span>
+                                    {% else %}
+                                        <span class="badge badge-purple">Clear</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="font-weight: 600; color: var(--accent-green);">{{ "%.1f"|format(pred.confidence * 100) }}%</span>
+                                </td>
+                                <td>{{ pred.x }}</td>
+                                <td>{{ pred.y }}</td>
+                                <td>{{ pred.width }}</td>
+                                <td>{{ pred.height }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+// ============================================
+// VEHICLE DETAILS & VIOLATION LOGIC
+// Frontend-only implementation using localStorage
+// ============================================
+
+/**
+ * Load vehicle number plate from localStorage
+ * Displays the saved number plate in the vehicle details section
+ */
+function loadVehicleDetails() {
+    const savedPlate = localStorage.getItem('vehicleNumberPlate');
+    const plateDisplay = document.getElementById('vehicleNumberPlateDisplay');
+    
+    if (savedPlate && plateDisplay) {
+        plateDisplay.textContent = savedPlate;
+        plateDisplay.style.color = 'var(--accent-primary)';
+    }
+}
+
+/**
+ * Determine violation status based on tint detection results
+ * Violation logic: If tinted_windows > 0, it's a violation
+ * 
+ * @param {number} tintedWindows - Number of tinted windows detected
+ * @param {number} totalWindows - Total windows detected
+ * @returns {object} - {hasViolation: boolean, details: object}
+ */
+function determineViolation(tintedWindows, totalWindows) {
+    // Violation if any tinted windows are detected
+    const hasViolation = tintedWindows > 0;
+    
+    // Static violation details (frontend configuration)
+    const violationDetails = {
+        hasViolation: hasViolation,
+        type: 'Illegal Window Tint',
+        legalReference: 'Motor Vehicles Act, 1988 - Section 100(2)',
+        legalDescription: 'Use of tinted glass/films on vehicle windows',
+        penaltyAmount: '₹ 2,000 - ₹ 5,000',
+        penaltyNote: 'May vary by state jurisdiction',
+        tintedCount: tintedWindows,
+        totalCount: totalWindows
+    };
+    
+    return violationDetails;
+}
+
+/**
+ * Display violation summary based on detection results
+ * Updates UI to show either compliant or violation status
+ */
+function displayViolationSummary() {
+    // Get detection results from the page (from backend data)
+    const tintedWindows = {{ result.tinted_windows }};
+    const totalWindows = {{ result.windows_detected }};
+    
+    // Determine violation status
+    const violation = determineViolation(tintedWindows, totalWindows);
+    
+    // Get DOM elements
+    const statusContainer = document.getElementById('complianceStatusContainer');
+    const statusIcon = document.getElementById('complianceIcon');
+    const statusText = document.getElementById('complianceStatus');
+    const statusMessage = document.getElementById('complianceMessage');
+    const violationDetailsDiv = document.getElementById('violationDetails');
+    
+    if (violation.hasViolation) {
+        // Show VIOLATION status (Red)
+        statusContainer.style.background = 'rgba(239, 68, 68, 0.1)';
+        statusContainer.style.borderColor = 'var(--accent-danger)';
+        statusIcon.textContent = '⚠️';
+        statusText.textContent = 'VIOLATION DETECTED';
+        statusText.style.color = 'var(--accent-danger)';
+        statusMessage.textContent = `${violation.tintedCount} tinted window(s) detected`;
+        statusMessage.style.color = 'var(--accent-danger)';
+        
+        // Show violation details
+        violationDetailsDiv.style.display = 'block';
+        document.getElementById('violationType').textContent = violation.type;
+        document.getElementById('legalReference').textContent = violation.legalReference;
+        document.getElementById('penaltyAmount').textContent = violation.penaltyAmount;
+        
+    } else {
+        // Show COMPLIANT status (Green)
+        statusContainer.style.background = 'rgba(16, 185, 129, 0.1)';
+        statusContainer.style.borderColor = 'var(--accent-success)';
+        statusIcon.textContent = '✅';
+        statusText.textContent = 'COMPLIANT';
+        statusText.style.color = 'var(--accent-success)';
+        statusMessage.textContent = 'No violations detected';
+        statusMessage.style.color = 'var(--text-muted)';
+        
+        // Hide violation details
+        violationDetailsDiv.style.display = 'none';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadVehicleDetails();
+    displayViolationSummary();
+});
+</script>
+{% endblock %}

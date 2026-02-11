@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 20px;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 40px;">
+        <h1 style="font-size: 2rem; color: var(--accent-green); margin-bottom: 8px;">📊 Analytics & Statistics</h1>
+        <p style="color: var(--text-gray);">View your detection performance and trends</p>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- Test Type Breakdown -->
+        <div class="card">
+            <h2 style="color: var(--accent-green); margin-bottom: 20px;">📈 Test Type Breakdown</h2>
+            <canvas id="testTypeChart" style="max-height: 300px;"></canvas>
+        </div>
+
+        <!-- Window Type Breakdown -->
+        <div class="card">
+            <h2 style="color: var(--accent-green); margin-bottom: 20px;">🪟 Window Type Breakdown</h2>
+            <canvas id="windowTypeChart" style="max-height: 300px;"></canvas>
+        </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="card" style="margin-top: 24px;">
+        <h2 style="color: var(--accent-green); margin-bottom: 20px;">📉 30-Day Trend</h2>
+        <canvas id="trendChart" style="max-height: 350px;"></canvas>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+if (typeof Chart !== 'undefined') {
+    const chartData = {{ chart_data | safe }};
+    
+    // Test Type Chart
+    if (chartData.type_breakdown) {
+        const testTypeCtx = document.getElementById('testTypeChart').getContext('2d');
+        new Chart(testTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Image', 'Video', 'Webcam'],
+                datasets: [{
+                    data: [
+                        chartData.type_breakdown.image,
+                        chartData.type_breakdown.video,
+                        chartData.type_breakdown.webcam
+                    ],
+                    backgroundColor: ['#22c55e', '#3b82f6', '#b400ff'],
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#f3f4f6', font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // Window Type Chart
+    if (chartData.window_breakdown) {
+        const windowTypeCtx = document.getElementById('windowTypeChart').getContext('2d');
+        new Chart(windowTypeCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Tinted', 'Clear'],
+                datasets: [{
+                    data: [
+                        chartData.window_breakdown.tinted,
+                        chartData.window_breakdown.clear
+                    ],
+                    backgroundColor: ['#ff00ff', '#3b82f6'],
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#f3f4f6', font: { size: 12 } }
+                    }
+                }
+            }
+        });
+    }
+
+    // Trend Chart
+    if (chartData.trend_data) {
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: chartData.trend_data.dates,
+                datasets: [{
+                    label: 'Tests',
+                    data: chartData.trend_data.counts,
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#22c55e',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    yAxisID: 'y'
+                }, {
+                    label: 'Avg Confidence',
+                    data: chartData.trend_data.confidence,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        labels: { color: '#f3f4f6', font: { size: 12 } }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        type: 'linear',
+                        position: 'left',
+                        grid: { color: 'rgba(75, 85, 99, 0.2)' },
+                        ticks: { color: '#f3f4f6' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        max: 1,
+                        grid: { display: false },
+                        ticks: { color: '#f3f4f6' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#f3f4f6' }
+                    }
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Test - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 48px 24px;">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-header__title">🧪 Test Detection</h1>
+        <p class="page-header__description">Choose how you want to test the AI model for tinted window detection</p>
+    </div>
+
+    <!-- Test Options -->
+    <div class="grid grid-3">
+        <!-- Image Test Card -->
+        <div class="option-card" role="button" tabindex="0" aria-label="Image Test Option">
+            <div class="option-card__icon">📷</div>
+            <h2 class="option-card__title">Image Test</h2>
+            <p class="option-card__description">Upload a single image to detect tinted windows with AI-powered analysis</p>
+            <a href="{{ url_for('main.test_image') }}" class="btn btn-primary btn-block">
+                Start Image Test →
+            </a>
+        </div>
+
+        <!-- Video Test Card -->
+        <div class="option-card" role="button" tabindex="0" aria-label="Video Test Option">
+            <div class="option-card__icon">🎬</div>
+            <h2 class="option-card__title">Video Test</h2>
+            <p class="option-card__description">Upload a video file to analyze multiple frames for tinted windows</p>
+            <a href="{{ url_for('main.test_video') }}" class="btn btn-primary btn-block">
+                Start Video Test →
+            </a>
+        </div>
+
+        <!-- Webcam Test Card -->
+        <div class="option-card" role="button" tabindex="0" aria-label="Webcam Test Option">
+            <div class="option-card__icon">📹</div>
+            <h2 class="option-card__title">Live Webcam</h2>
+            <p class="option-card__description">Use your webcam for real-time detection and instant results</p>
+            <a href="{{ url_for('main.test_webcam') }}" class="btn btn-primary btn-block">
+                Start Webcam Test →
+            </a>
+        </div>
+    </div>
+
+    <!-- Information Section -->
+    <div class="info-panel">
+        <h2 class="info-panel__title">
+            <span>ℹ️</span>
+            <span>How It Works</span>
+        </h2>
+        
+        <div class="info-panel__grid">
+            <div class="info-panel__item">
+                <h3>1. Upload or Capture</h3>
+                <p>Choose from image, video, or use your webcam to capture vehicle data for analysis.</p>
+            </div>
+            
+            <div class="info-panel__item">
+                <h3>2. AI Analysis</h3>
+                <p>Our advanced AI model analyzes the data to detect tinted windows with high accuracy.</p>
+            </div>
+            
+            <div class="info-panel__item">
+                <h3>3. View Results</h3>
+                <p>Get detailed results with visual annotations and confidence scores for each detection.</p>
+            </div>
+            
+            <div class="info-panel__item">
+                <h3>4. Track Performance</h3>
+                <p>All results are automatically saved and tracked in your personal dashboard.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="card" style="margin-top: 32px;">
+        <h2 style="background: var(--gradient-success); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 1.5rem; font-weight: 700; margin-bottom: 28px;">✨ Features & Capabilities</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div class="feature-card">
+                <span class="feature-card__icon">🎯</span>
+                <div class="feature-card__content">
+                    <h3 class="feature-card__title">High Accuracy</h3>
+                    <p class="feature-card__description">Detects even subtle window tinting with industry-leading precision</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-card__icon">⚡</span>
+                <div class="feature-card__content">
+                    <h3 class="feature-card__title">Real-Time Processing</h3>
+                    <p class="feature-card__description">Get instant results from your tests with optimized AI inference</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-card__icon">💾</span>
+                <div class="feature-card__content">
+                    <h3 class="feature-card__title">Data Storage</h3>
+                    <p class="feature-card__description">All test results are securely saved for future reference and analysis</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-card__icon">📊</span>
+                <div class="feature-card__content">
+                    <h3 class="feature-card__title">Analytics Dashboard</h3>
+                    <p class="feature-card__description">Track trends and performance metrics with detailed analytics</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-card__icon">🔒</span>
+                <div class="feature-card__content">
+                    <h3 class="feature-card__title">Secure & Private</h3>
+                    <p class="feature-card__description">Your data is encrypted and stored securely with enterprise-grade security</p>
+                </div>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-card__icon">🌐</span>
+                <div class="feature-card__content">
+                    <h3 class="feature-card__title">Cloud-Based</h3>
+                    <p class="feature-card__description">Access your results anywhere, anytime with cloud synchronization</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Make entire option cards clickable
+document.addEventListener('DOMContentLoaded', function() {
+    const optionCards = document.querySelectorAll('.option-card');
+    
+    optionCards.forEach(card => {
+        // Add click handler
+        card.addEventListener('click', function(e) {
+            // Find the link inside this card
+            const link = this.querySelector('a.btn');
+            if (link && !e.target.closest('a')) {
+                // If we didn't click directly on the link, navigate to it
+                window.location.href = link.href;
+            }
+        });
+        
+        // Add keyboard support
+        card.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const link = this.querySelector('a.btn');
+                if (link) {
+                    window.location.href = link.href;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1263 @@
+{% extends "base.html" %}
+
+{% block title %}Login - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<!-- ============================================
+     RESPONSIVE LOGIN PAGE
+     AI-Based Vehicle Tint Detection System
+     
+     LAYOUT STRATEGY:
+     - Desktop (>= 1024px): Split layout with animation + form
+     - Tablet (768px - 1023px): Split layout with reduced animation
+     - Mobile (< 768px): Form only, no animation
+     
+     PERFORMANCE FEATURES:
+     - GPU-accelerated CSS animations only (transform, opacity)
+     - JavaScript-based device capability detection
+     - Automatic low-end device fallback
+     - Respects prefers-reduced-motion setting
+     - Battery saver mode support
+     - No blocking of login form interaction
+     
+     ANIMATION FLOW (12 seconds):
+     Step 1 (0-3s): Man with camera appears
+     Step 2 (2-3s): Camera flash/click effect
+     Step 3 (3-6s): Photo moves to AI scanner
+     Step 4 (6-10s): AI scanning analysis
+     Step 5 (10-12s): Analysis complete indicator
+     Then loops smoothly
+     ============================================ -->
+<div class="login-container">
+    
+    <!-- ============================================
+         LEFT SIDE: ANIMATION SECTION
+         Hidden on mobile (< 768px)
+         Simplified on tablet (768px - 1023px)
+         Full animation on desktop (>= 1024px)
+         ============================================ -->
+    <div class="login-animation-section">
+        <!-- Background gradient -->
+        <div class="login-animation-bg"></div>
+        
+        <!-- Animation content wrapper -->
+        <div class="login-animation-content">
+            <h2 class="login-animation-title">AI-Powered Vehicle Tint Detection</h2>
+            <p class="login-animation-subtitle">Real-time analysis with machine learning</p>
+            
+            <!-- Main animation container -->
+            <div class="animation-stage">
+                
+                <!-- Step 1: Photographer with camera -->
+                <div class="animation-photographer">
+                    <div class="photographer-icon">📷</div>
+                    <div class="photographer-label">Capture</div>
+                </div>
+                
+                <!-- Step 2: Camera flash/click effect -->
+                <div class="animation-flash"></div>
+                
+                <!-- Step 3: Photo moving to AI scanner -->
+                <div class="animation-photo">
+                    <div class="photo-icon">🚗</div>
+                </div>
+                
+                <!-- Step 4: AI Scanner overlay -->
+                <div class="animation-scanner">
+                    <div class="scanner-frame"></div>
+                    <div class="scanner-line"></div>
+                    <div class="scanner-grid">
+                        <span></span><span></span><span></span>
+                        <span></span><span></span><span></span>
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+                
+                <!-- Step 5: Analysis complete indicator -->
+                <div class="animation-complete">
+                    <div class="complete-icon">✓</div>
+                    <div class="complete-label">Tint Analysis Complete</div>
+                    <div class="complete-details">
+                        <span class="detail-item">Front: 45%</span>
+                        <span class="detail-item">Rear: 35%</span>
+                        <span class="detail-item">Status: Legal</span>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Feature highlights -->
+            <div class="login-features">
+                <div class="feature-item">
+                    <span class="feature-icon">⚡</span>
+                    <span class="feature-text">Real-time Detection</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🎯</span>
+                    <span class="feature-text">99% Accuracy</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-icon">🔒</span>
+                    <span class="feature-text">Secure & Reliable</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================
+         RIGHT SIDE: LOGIN FORM
+         Always visible and functional on all devices
+         ============================================ -->
+    <div class="login-form-section">
+        <div class="login-form-wrapper">
+            
+            <!-- Logo (visible on mobile when animation is hidden) -->
+            <div class="login-mobile-logo">
+                <div class="mobile-logo-icon">🚗</div>
+                <h1 class="mobile-logo-title">AI Vehicle Tint Detection</h1>
+            </div>
+            
+            <!-- Form header -->
+            <div class="login-form-header">
+                <h2>Welcome Back</h2>
+                <p>Sign in to access your dashboard</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form method="POST" class="login-form">
+                
+                <!-- Username -->
+                <div class="form-group">
+                    <label for="username" class="form-label required">Username</label>
+                    <div class="form-input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input 
+                            type="text" 
+                            class="form-input form-input-with-icon" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            placeholder="Enter your username"
+                            autofocus
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password" class="form-label required">Password</label>
+                    <div class="form-input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            class="form-input form-input-with-icon" 
+                            id="password" 
+                            name="password" 
+                            required 
+                            placeholder="Enter your password"
+                        >
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-lg btn-block login-submit-btn">
+                    <span>Sign In</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+
+                <!-- Registration Link -->
+                <div class="login-footer">
+                    <p>
+                        Don't have an account? 
+                        <a href="{{ url_for('auth.register') }}" class="login-register-link">Create Account</a>
+                    </p>
+                </div>
+                
+            </form>
+            
+        </div>
+    </div>
+    
+</div>
+
+<!-- ============================================
+     STYLES: RESPONSIVE LOGIN PAGE
+     Pure CSS animations with progressive enhancement
+     ============================================ -->
+<style>
+/* ============================================
+   BASE CONTAINER - RESPONSIVE FLEXBOX LAYOUT
+   
+   Desktop: Two-column flex layout
+   Mobile: Single-column block layout
+   
+   Performance: Uses flexbox for efficient rendering
+   ============================================ */
+
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ============================================
+   LEFT SIDE: ANIMATION SECTION
+   
+   Visibility:
+   - Desktop (>= 1024px): Full animation
+   - Tablet (768px - 1023px): Reduced animation
+   - Mobile (< 768px): Hidden (display: none)
+   
+   Purpose: Brand showcase and visual engagement
+   No impact on form functionality
+   ============================================ */
+
+.login-animation-section {
+    flex: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    overflow: hidden;
+}
+
+/* Animated background with subtle movement */
+.login-animation-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+    animation: bg-shift 15s ease-in-out infinite;
+}
+
+@keyframes bg-shift {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -20px); }    /* Subtle parallax effect */
+}
+
+.login-animation-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    width: 100%;
+}
+
+/* Animation section title */
+.login-animation-title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    text-align: center;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    animation: fade-in-up 0.6s ease-out;
+}
+
+/* Animation section subtitle */
+.login-animation-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.125rem;
+    text-align: center;
+    margin-bottom: 60px;
+    animation: fade-in-up 0.8s ease-out;
+}
+
+/* ============================================
+   ANIMATION STAGE
+   Main animation loop: Man with Camera → Flash → Photo → AI Scan → Complete
+   Total duration: 12 seconds with smooth looping
+   Uses GPU-accelerated properties ONLY (transform, opacity)
+   ============================================ */
+
+.animation-stage {
+    width: 100%;
+    height: 400px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+/* ============================================
+   STEP 1: MAN WITH CAMERA APPEARS (0s - 3s)
+   - Photographer appears with camera
+   - Slight rotation animation for taking photo
+   ============================================ */
+
+.animation-photographer {
+    position: absolute;
+    left: 20%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    animation: photographer-enter 12s ease-in-out infinite;
+}
+
+.photographer-icon {
+    font-size: 4rem;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    animation: photographer-rotate 12s ease-in-out infinite;
+}
+
+.photographer-label {
+    color: white;
+    font-weight: 600;
+    margin-top: 8px;
+    font-size: 0.875rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Photographer fade in/out timing */
+@keyframes photographer-enter {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }      /* Visible 0s-3s */
+    20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    30% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }    /* Fade out */
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
+
+/* Camera click rotation effect */
+@keyframes photographer-rotate {
+    0%, 15% { transform: rotate(0deg); }
+    18% { transform: rotate(-5deg); }     /* Camera click moment */
+    22% { transform: rotate(0deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* ============================================
+   STEP 2: CAMERA FLASH/CLICK (2s - 3s)
+   - Quick flash effect when photo is taken
+   - Simulates camera flash
+   ============================================ */
+
+.animation-flash {
+    position: absolute;
+    left: 20%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: flash-effect 12s ease-in-out infinite;
+}
+
+@keyframes flash-effect {
+    0%, 17% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.5); }    /* Flash! */
+    23% { opacity: 0; transform: translate(-50%, -50%) scale(2); }      /* Quick fade */
+    100% { opacity: 0; }
+}
+
+/* ============================================
+   STEP 3: PHOTO MOVES TO AI SCANNER (3s - 6s)
+   - Car photo moves from left to right
+   - Travels to the AI scanning area
+   ============================================ */
+
+.animation-photo {
+    position: absolute;
+    left: 20%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    animation: photo-move 12s ease-in-out infinite;
+}
+
+.photo-icon {
+    font-size: 3rem;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes photo-move {
+    0%, 25% { 
+        left: 20%; 
+        top: 50%; 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0.5); 
+    }
+    30% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1);      /* Photo appears */
+    }
+    50% { 
+        left: 80%;                                       /* Move to scanner */
+        top: 50%; 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1); 
+    }
+    55% { 
+        opacity: 0;                                      /* Enters scanner */
+        transform: translate(-50%, -50%) scale(0.8); 
+    }
+    100% { opacity: 0; }
+}
+
+/* ============================================
+   STEP 4: AI SCANNING ANIMATION (6s - 10s)
+   - Scanner frame with scanning line
+   - Grid analysis effect
+   - Simulates AI analyzing the vehicle tint
+   ============================================ */
+
+.animation-scanner {
+    position: absolute;
+    right: 10%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+    animation: scanner-appear 12s ease-in-out infinite;
+}
+
+/* Scanner frame with corner brackets */
+.scanner-frame {
+    width: 100%;
+    height: 100%;
+    border: 3px solid #10b981;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+.scanner-frame::before,
+.scanner-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #10b981;
+}
+
+.scanner-frame::before {
+    top: -3px;
+    left: -3px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.scanner-frame::after {
+    bottom: -3px;
+    right: -3px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Scanning line moving up and down */
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(16, 185, 129, 0.8) 50%, 
+        transparent 100%
+    );
+    animation: scanner-scan 2s ease-in-out infinite;
+}
+
+@keyframes scanner-scan {
+    0% { top: 0; }
+    50% { top: calc(100% - 3px); }    /* Scan down */
+    100% { top: 0; }                   /* Scan up */
+}
+
+/* Grid cells pulsing during analysis */
+.scanner-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+.scanner-grid span {
+    background: rgba(16, 185, 129, 0.2);
+    border-radius: 4px;
+    animation: grid-pulse 1.5s ease-in-out infinite;
+}
+
+/* Staggered animation for each grid cell */
+.scanner-grid span:nth-child(1) { animation-delay: 0s; }
+.scanner-grid span:nth-child(2) { animation-delay: 0.1s; }
+.scanner-grid span:nth-child(3) { animation-delay: 0.2s; }
+.scanner-grid span:nth-child(4) { animation-delay: 0.3s; }
+.scanner-grid span:nth-child(5) { animation-delay: 0.4s; }
+.scanner-grid span:nth-child(6) { animation-delay: 0.5s; }
+.scanner-grid span:nth-child(7) { animation-delay: 0.6s; }
+.scanner-grid span:nth-child(8) { animation-delay: 0.7s; }
+.scanner-grid span:nth-child(9) { animation-delay: 0.8s; }
+
+@keyframes grid-pulse {
+    0%, 100% { background: rgba(16, 185, 129, 0.2); }
+    50% { background: rgba(16, 185, 129, 0.6); }       /* Pulse effect */
+}
+
+/* Scanner appearance timing */
+@keyframes scanner-appear {
+    0%, 50% { opacity: 0; transform: translateY(-50%) scale(0.8); }
+    55% { opacity: 1; transform: translateY(-50%) scale(1); }      /* Scanner active 6s-10s */
+    80% { opacity: 1; transform: translateY(-50%) scale(1); }
+    85% { opacity: 0; transform: translateY(-50%) scale(0.8); }    /* Scanner disappears */
+    100% { opacity: 0; }
+}
+
+/* ============================================
+   STEP 5: ANALYSIS COMPLETE (10s - 12s)
+   - Checkmark appears with results
+   - Shows tint percentages and status
+   - Success indicator
+   ============================================ */
+
+.animation-complete {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    opacity: 0;
+    animation: complete-appear 12s ease-in-out infinite;
+}
+
+.complete-icon {
+    width: 80px;
+    height: 80px;
+    background: #10b981;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+    animation: complete-check 12s ease-in-out infinite;
+}
+
+/* Checkmark bounce effect */
+@keyframes complete-check {
+    0%, 82% { transform: scale(0); }
+    85% { transform: scale(1.2); }     /* Bounce */
+    88% { transform: scale(0.95); }    /* Settle */
+    90% { transform: scale(1); }       /* Final size */
+    100% { transform: scale(1); }
+}
+
+.complete-label {
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.complete-details {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.detail-item {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+@keyframes complete-appear {
+    0%, 83% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+    87% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    95% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+}
+
+/* Feature highlights below animation */
+.login-features {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    animation: fade-in-up 1s ease-out;
+}
+
+.feature-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+
+.feature-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+@keyframes fade-in-up {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   RIGHT SIDE: LOGIN FORM SECTION
+   
+   Purpose: User authentication
+   Visibility: Always visible on all devices
+   Performance: Subtle fade-in animation only
+   
+   IMPORTANT: Form must remain functional at all times
+   No animation should block or delay form interaction
+   ============================================ */
+
+.login-form-section {
+    flex: 0 0 480px;
+    background: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    position: relative;
+    animation: form-fade-in 0.8s ease-out;
+}
+
+/* Subtle form entrance animation */
+@keyframes form-fade-in {
+    0% { opacity: 0; transform: translateX(20px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 400px;
+}
+
+/* Mobile logo - hidden on desktop, shown on mobile */
+.login-mobile-logo {
+    display: none;
+}
+
+.login-form-header {
+    margin-bottom: 32px;
+}
+
+.login-form-header h2 {
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.login-form-header p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.login-form {
+    /* Form inherits global styles from base.html */
+}
+
+.form-input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    opacity: 0.6;
+}
+
+.form-input-with-icon {
+    padding-left: 52px;
+}
+
+.login-submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 32px;
+    transition: all 0.3s ease;
+}
+
+.login-submit-btn:hover .btn-arrow {
+    transform: translateX(4px);
+}
+
+.btn-arrow {
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+.login-footer {
+    text-align: center;
+    margin-top: 24px;
+}
+
+.login-footer p {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.login-register-link {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease;
+}
+
+.login-register-link:hover {
+    color: var(--accent-success);
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   Desktop-first approach with progressive enhancement
+   ============================================ */
+
+/* LARGE DESKTOP: >= 1440px - Full experience */
+@media (min-width: 1440px) {
+    .login-animation-section {
+        padding: 80px 60px;
+    }
+    
+    .animation-stage {
+        height: 450px;
+    }
+    
+    .login-form-section {
+        flex: 0 0 520px;
+        padding: 60px;
+    }
+}
+
+/* TABLET: 768px - 1023px - REDUCED animation complexity */
+@media (max-width: 1023px) and (min-width: 768px) {
+    /* Split layout maintained but animation simplified */
+    .login-animation-section {
+        flex: 0 0 45%;
+        padding: 40px 24px;
+    }
+    
+    .login-animation-title {
+        font-size: 1.75rem;
+    }
+    
+    .login-animation-subtitle {
+        font-size: 0.9375rem;
+        margin-bottom: 40px;
+    }
+    
+    /* Smaller animation stage for performance */
+    .animation-stage {
+        height: 300px;
+    }
+    
+    /* Reduce icon sizes to minimize rendering cost */
+    .photographer-icon,
+    .photo-icon {
+        font-size: 2.5rem;
+    }
+    
+    .animation-scanner {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .complete-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    /* Simplify feature section */
+    .login-features {
+        gap: 20px;
+    }
+    
+    .feature-icon {
+        font-size: 1.5rem;
+    }
+    
+    .feature-text {
+        font-size: 0.75rem;
+    }
+    
+    /* Adjust form section */
+    .login-form-section {
+        flex: 0 0 55%;
+        padding: 32px;
+    }
+    
+    /* PERFORMANCE: Remove background animation on tablets */
+    .login-animation-bg {
+        animation: none;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    }
+    
+    /* PERFORMANCE: Simplify scanner animation */
+    .scanner-grid {
+        display: none; /* Hide grid on tablets to reduce DOM elements */
+    }
+}
+
+/* MOBILE: < 768px - ANIMATION COMPLETELY HIDDEN */
+/* Performance priority: No animation rendering to save battery and CPU */
+@media (max-width: 767px) {
+    .login-container {
+        display: block;
+    }
+    
+    /* CRITICAL: Hide entire animation section on mobile */
+    /* This prevents rendering, saving significant CPU/GPU resources */
+    .login-animation-section {
+        display: none;
+    }
+    
+    /* Form takes full viewport */
+    .login-form-section {
+        flex: 1;
+        min-height: 100vh;
+        padding: 24px;
+        animation: none; /* Remove form fade-in on mobile */
+    }
+    
+    /* Show mobile-friendly logo */
+    .login-mobile-logo {
+        display: block;
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .mobile-logo-icon {
+        font-size: 3.5rem;
+        margin-bottom: 16px;
+        filter: drop-shadow(0 4px 12px rgba(139, 92, 246, 0.3));
+    }
+    
+    .mobile-logo-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .login-form-header h2 {
+        font-size: 1.75rem;
+    }
+    
+    .login-form-wrapper {
+        max-width: 100%;
+    }
+}
+
+/* SMALL MOBILE: < 480px */
+@media (max-width: 479px) {
+    .login-form-section {
+        padding: 20px 16px;
+    }
+    
+    .mobile-logo-icon {
+        font-size: 3rem;
+    }
+    
+    .mobile-logo-title {
+        font-size: 1.25rem;
+    }
+    
+    .login-form-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .login-form-header p {
+        font-size: 0.875rem;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY: REDUCED MOTION SUPPORT
+   Respects user's system preference for reduced motion
+   When enabled:
+   - All animations are disabled
+   - Static illustration shown instead
+   - No CPU/GPU usage for animations
+   - Better for users with vestibular disorders
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+    /* Keep gradient background but remove animation */
+    .login-animation-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* Disable all animated elements */
+    .login-animation-bg,
+    .animation-photographer,
+    .animation-flash,
+    .animation-photo,
+    .animation-scanner,
+    .animation-complete {
+        animation: none !important;
+        opacity: 0 !important;
+    }
+    
+    /* Show static fallback illustration */
+    .animation-stage::before {
+        content: '🚗 📷 🤖 ✓';
+        font-size: 3rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+    
+    /* Disable all UI animations */
+    .login-animation-title,
+    .login-animation-subtitle,
+    .login-features,
+    .login-form-section {
+        animation: none !important;
+    }
+    
+    /* Disable sub-animations */
+    .scanner-line,
+    .scanner-grid span {
+        animation: none !important;
+    }
+    
+    /* Disable button animations */
+    .login-submit-btn:hover .btn-arrow {
+        transform: none !important;
+    }
+}
+
+/* ============================================
+   GPU ACCELERATION & PERFORMANCE OPTIMIZATION
+   Forces GPU layer creation for smooth 60fps animations
+   Uses will-change to hint browser about upcoming changes
+   Note: will-change is removed after 15s via JavaScript
+   ============================================ */
+
+/* Apply GPU acceleration to animated elements */
+.animation-stage,
+.animation-photographer,
+.animation-flash,
+.animation-photo,
+.animation-scanner,
+.animation-complete,
+.login-animation-bg {
+    /* Create GPU layer for better performance */
+    will-change: transform, opacity;
+    
+    /* Force hardware acceleration */
+    transform: translateZ(0);
+    
+    /* Prevent flickering */
+    backface-visibility: hidden;
+    
+    /* Smoother font rendering */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Apply to form section for smooth fade-in */
+.login-form-section {
+    will-change: opacity, transform;
+    transform: translateZ(0);
+}
+
+/* Cleanup after animation */
+.animation-stage * {
+    animation-fill-mode: forwards;
+}
+
+/* ============================================
+   LOW-END DEVICE SUPPORT
+   Simplified animations for devices with limited resources
+   Applied via JavaScript detection
+   ============================================ */
+
+/* Class applied to body when low-end device detected */
+.low-end-device .animation-stage {
+    height: 300px;
+}
+
+.low-end-device .animation-photographer,
+.low-end-device .animation-photo,
+.low-end-device .animation-scanner,
+.low-end-device .animation-complete {
+    animation-duration: 8s !important; /* Faster, simpler loop */
+}
+
+.low-end-device .login-animation-bg {
+    animation: none !important; /* Remove background animation */
+    background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+}
+
+.low-end-device .scanner-line,
+.low-end-device .scanner-grid span {
+    animation: none !important; /* Disable sub-animations */
+}
+
+.low-end-device .animation-flash {
+    display: none; /* Remove flash effect on low-end devices */
+}
+
+/* Class applied when user is on battery power */
+.battery-saver .animation-photographer,
+.battery-saver .animation-photo,
+.battery-saver .animation-scanner,
+.battery-saver .animation-complete,
+.battery-saver .login-animation-bg {
+    animation-duration: 20s !important; /* Slower animations save battery */
+}
+</style>
+
+<!-- ============================================
+     JAVASCRIPT: DEVICE CAPABILITY DETECTION
+     Detects low-end devices and adjusts animations
+     ============================================ -->
+<script>
+(function() {
+    'use strict';
+    
+    /**
+     * Device Performance Detector
+     * Analyzes device capabilities and adjusts UI accordingly
+     */
+    
+    // ============================================
+    // PERFORMANCE DETECTION
+    // ============================================
+    
+    /**
+     * Detect if device is low-end based on:
+     * - Device memory (< 4GB)
+     * - Hardware concurrency (< 4 cores)
+     * - Connection speed (slow-2g, 2g)
+     * - Mobile device with small screen
+     */
+    function detectLowEndDevice() {
+        const indicators = [];
+        
+        // Check 1: Device memory (if available)
+        if (navigator.deviceMemory && navigator.deviceMemory < 4) {
+            indicators.push('low-memory');
+            console.log('[Performance] Low memory detected:', navigator.deviceMemory, 'GB');
+        }
+        
+        // Check 2: CPU cores (if available)
+        if (navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4) {
+            indicators.push('low-cpu');
+            console.log('[Performance] Low CPU cores:', navigator.hardwareConcurrency);
+        }
+        
+        // Check 3: Network connection (if available)
+        if (navigator.connection) {
+            const effectiveType = navigator.connection.effectiveType;
+            if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+                indicators.push('slow-network');
+                console.log('[Performance] Slow network:', effectiveType);
+            }
+        }
+        
+        // Check 4: Small mobile screen (likely low-end mobile)
+        const isMobile = window.innerWidth < 768;
+        const hasLowDPI = window.devicePixelRatio && window.devicePixelRatio < 2;
+        if (isMobile && hasLowDPI) {
+            indicators.push('low-dpi-mobile');
+            console.log('[Performance] Low-DPI mobile device detected');
+        }
+        
+        // Consider device low-end if 2 or more indicators present
+        return indicators.length >= 2;
+    }
+    
+    /**
+     * Check if user is on battery power
+     * Reduce animation intensity to save battery
+     */
+    function checkBatteryStatus() {
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(function(battery) {
+                if (battery.charging === false && battery.level < 0.3) {
+                    document.body.classList.add('battery-saver');
+                    console.log('[Performance] Battery saver mode enabled');
+                }
+                
+                // Listen for battery changes
+                battery.addEventListener('chargingchange', function() {
+                    if (battery.charging) {
+                        document.body.classList.remove('battery-saver');
+                    } else if (battery.level < 0.3) {
+                        document.body.classList.add('battery-saver');
+                    }
+                });
+            });
+        }
+    }
+    
+    /**
+     * Check for reduced motion preference (accessibility)
+     * This is already handled in CSS but we log it for debugging
+     */
+    function checkReducedMotion() {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+            console.log('[Accessibility] Reduced motion preference detected');
+        }
+        return prefersReducedMotion;
+    }
+    
+    // ============================================
+    // PERFORMANCE MONITORING
+    // ============================================
+    
+    /**
+     * Monitor frame rate to detect performance issues
+     * If FPS drops below 30, simplify animations
+     */
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let lowFPSCount = 0;
+    
+    function monitorPerformance() {
+        frameCount++;
+        const currentTime = performance.now();
+        
+        // Check FPS every second
+        if (currentTime >= lastTime + 1000) {
+            const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+            
+            if (fps < 30) {
+                lowFPSCount++;
+                console.warn('[Performance] Low FPS detected:', fps);
+                
+                // If FPS is consistently low (3+ seconds), mark as low-end
+                if (lowFPSCount >= 3 && !document.body.classList.contains('low-end-device')) {
+                    document.body.classList.add('low-end-device');
+                    console.log('[Performance] Auto-enabled low-end mode due to low FPS');
+                }
+            } else {
+                lowFPSCount = 0; // Reset counter if FPS is good
+            }
+            
+            frameCount = 0;
+            lastTime = currentTime;
+        }
+        
+        // Continue monitoring for first 5 seconds only (to avoid performance overhead)
+        if (currentTime < lastTime + 5000) {
+            requestAnimationFrame(monitorPerformance);
+        }
+    }
+    
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    /**
+     * Initialize performance detection on page load
+     */
+    function initPerformanceDetection() {
+        console.log('[Performance] Starting device capability detection...');
+        
+        // Run detection checks
+        const isLowEnd = detectLowEndDevice();
+        const hasReducedMotion = checkReducedMotion();
+        
+        // Apply low-end class if detected
+        if (isLowEnd) {
+            document.body.classList.add('low-end-device');
+            console.log('[Performance] Low-end device detected - simplified animations enabled');
+        } else {
+            console.log('[Performance] Standard device detected - full animations enabled');
+        }
+        
+        // Check battery status
+        checkBatteryStatus();
+        
+        // Start FPS monitoring (only if animations are visible and not on mobile)
+        if (window.innerWidth >= 768 && !hasReducedMotion) {
+            requestAnimationFrame(monitorPerformance);
+        }
+        
+        // Log final configuration
+        console.log('[Performance] Configuration:', {
+            lowEndDevice: isLowEnd,
+            reducedMotion: hasReducedMotion,
+            screenWidth: window.innerWidth,
+            deviceMemory: navigator.deviceMemory || 'unknown',
+            hardwareConcurrency: navigator.hardwareConcurrency || 'unknown',
+            devicePixelRatio: window.devicePixelRatio || 1
+        });
+    }
+    
+    // ============================================
+    // PREVENT ANIMATION FROM BLOCKING LOGIN FORM
+    // ============================================
+    
+    /**
+     * Ensure animations don't interfere with form interaction
+     * Add will-change only when needed to reduce memory usage
+     */
+    function optimizeWillChange() {
+        const animationElements = document.querySelectorAll('.animation-stage, .animation-photographer, .animation-photo, .animation-scanner');
+        
+        // Remove will-change after initial animations complete (after 15s)
+        setTimeout(function() {
+            animationElements.forEach(function(el) {
+                el.style.willChange = 'auto';
+            });
+            console.log('[Performance] will-change properties removed to save memory');
+        }, 15000);
+    }
+    
+    // ============================================
+    // RUN ON PAGE LOAD
+    // ============================================
+    
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            initPerformanceDetection();
+            optimizeWillChange();
+        });
+    } else {
+        // DOM already loaded
+        initPerformanceDetection();
+        optimizeWillChange();
+    }
+    
+})();
+</script>
+
+{% endblock %}

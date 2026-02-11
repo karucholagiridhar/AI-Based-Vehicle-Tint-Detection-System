@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}Test Video - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 20px;">
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 2rem; color: var(--accent-green); margin-bottom: 8px;">🎬 Video Test</h1>
+        <p style="color: var(--text-gray);">Upload a video to analyze for tinted windows</p>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- Upload Area -->
+        <div>
+            <div class="card">
+                <h2 style="color: var(--accent-blue); margin-bottom: 20px;">📤 Upload Video</h2>
+                
+                <form id="videoForm" enctype="multipart/form-data">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">🎥</div>
+                        <p class="upload-text"><strong>Click or drag video here</strong></p>
+                        <p class="upload-hint">Supported: MP4, AVI, MOV, MKV | Max 500MB</p>
+                        <input type="file" id="videoInput" name="video" accept="video/*" style="display: none;">
+                    </div>
+
+                    <!-- Vehicle Number Plate Input -->
+                    <div class="form-group" style="margin-top: 24px;">
+                        <label for="vehicleNumberPlate" class="form-label" style="display: flex; align-items: center; gap: 8px; color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+                            <span>🚗</span>
+                            <span>Vehicle Number Plate (Optional)</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="vehicleNumberPlate" 
+                            name="vehicleNumberPlate"
+                            class="form-input" 
+                            placeholder="e.g., AP09AB1234"
+                            maxlength="15"
+                            style="text-transform: uppercase; font-weight: 600; letter-spacing: 1px;"
+                            aria-label="Vehicle number plate input"
+                        >
+                        <p id="plateValidationMsg" style="font-size: 0.8125rem; margin-top: 6px; display: none;"></p>
+                        <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">
+                            Enter the vehicle registration number (alphanumeric, uppercase)
+                        </p>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" style="margin-top: 20px;">
+                        🔍 Analyze Video
+                    </button>
+                </form>
+
+                <div id="fileName" style="margin-top: 16px; padding: 12px; background-color: var(--primary-darker); border-radius: 8px; color: var(--text-gray); display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div>
+            <div class="card" id="resultsCard" style="display: none;">
+                <h2 style="color: var(--accent-green); margin-bottom: 20px;">✅ Video Analysis Results</h2>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Total Windows Detected</label>
+                        <p style="color: var(--accent-green); font-size: 1.75rem; font-weight: 700;" id="resultWindows">0</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--accent-magenta);">
+                            <div style="font-size: 0.875rem; color: var(--text-dark-gray);">Tinted</div>
+                            <div style="color: var(--accent-magenta); font-size: 1.5rem; font-weight: 700;" id="resultTinted">0</div>
+                        </div>
+
+                        <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--accent-blue);">
+                            <div style="font-size: 0.875rem; color: var(--text-dark-gray);">Clear</div>
+                            <div style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 700;" id="resultClear">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Frames Processed</label>
+                        <p style="color: var(--text-light);" id="resultFrames">0</p>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Average Confidence</label>
+                        <div class="progress">
+                            <div class="progress-bar" id="resultConfidence" style="width: 0%;"></div>
+                        </div>
+                        <p style="color: var(--accent-green); font-weight: 600; margin-top: 4px;" id="resultConfidencePercent">0%</p>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Processing Time</label>
+                        <p style="color: var(--text-light);" id="resultTime">0s</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="loadingCard" class="card" style="display: none; text-align: center;">
+                <div class="spinner" style="width: 48px; height: 48px; border-width: 4px; margin: 20px auto;"></div>
+                <p style="color: var(--text-gray);">Processing video... This may take a few minutes</p>
+            </div>
+
+            <div id="errorCard" class="card" style="display: none; background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--error-color);">
+                <h3 style="color: var(--error-color); margin-bottom: 12px;">❌ Error</h3>
+                <p id="errorMessage" style="color: var(--error-color);"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const videoInput = document.getElementById('videoInput');
+const videoForm = document.getElementById('videoForm');
+const vehicleNumberPlate = document.getElementById('vehicleNumberPlate');
+const plateValidationMsg = document.getElementById('plateValidationMsg');
+
+// ============================================
+// VEHICLE NUMBER PLATE MANAGEMENT (Same as test_image.html)
+// ============================================
+
+function loadSavedNumberPlate() {
+    const savedPlate = localStorage.getItem('vehicleNumberPlate');
+    if (savedPlate && vehicleNumberPlate) {
+        vehicleNumberPlate.value = savedPlate;
+    }
+}
+
+function validateNumberPlate(plate) {
+    if (!plate || plate.trim() === '') {
+        return { valid: true, message: '' };
+    }
+    
+    plate = plate.replace(/\s/g, '').toUpperCase();
+    
+    const alphanumericRegex = /^[A-Z0-9]+$/;
+    if (!alphanumericRegex.test(plate)) {
+        return { 
+            valid: false, 
+            message: '❌ Only letters and numbers allowed (no special characters)' 
+        };
+    }
+    
+    if (plate.length < 4) {
+        return { 
+            valid: false, 
+            message: '❌ Number plate should be at least 4 characters' 
+        };
+    }
+    
+    if (plate.length > 15) {
+        return { 
+            valid: false, 
+            message: '❌ Number plate should not exceed 15 characters' 
+        };
+    }
+    
+    return { 
+        valid: true, 
+        message: '✅ Valid number plate format' 
+    };
+}
+
+function showPlateValidation(valid, message) {
+    if (!message) {
+        plateValidationMsg.style.display = 'none';
+        return;
+    }
+    
+    plateValidationMsg.textContent = message;
+    plateValidationMsg.style.display = 'block';
+    plateValidationMsg.style.color = valid ? 'var(--accent-success)' : 'var(--accent-danger)';
+}
+
+function saveNumberPlate(plate) {
+    if (plate && plate.trim() !== '') {
+        const cleanPlate = plate.replace(/\s/g, '').toUpperCase();
+        localStorage.setItem('vehicleNumberPlate', cleanPlate);
+        localStorage.setItem('vehicleNumberPlateTimestamp', new Date().toISOString());
+    } else {
+        localStorage.removeItem('vehicleNumberPlate');
+        localStorage.removeItem('vehicleNumberPlateTimestamp');
+    }
+}
+
+vehicleNumberPlate.addEventListener('input', function(e) {
+    this.value = this.value.toUpperCase();
+    const validation = validateNumberPlate(this.value);
+    showPlateValidation(validation.valid, validation.message);
+});
+
+vehicleNumberPlate.addEventListener('blur', function() {
+    const validation = validateNumberPlate(this.value);
+    if (validation.valid) {
+        saveNumberPlate(this.value);
+    }
+});
+
+document.addEventListener('DOMContentLoaded', loadSavedNumberPlate);
+
+// ============================================
+// UPLOAD FUNCTIONALITY
+// ============================================
+
+uploadArea.addEventListener('click', () => videoInput.click());
+uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+});
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    videoInput.files = e.dataTransfer.files;
+    updateFileName();
+});
+
+videoInput.addEventListener('change', updateFileName);
+
+function updateFileName() {
+    const fileName = document.getElementById('fileName');
+    if (videoInput.files.length > 0) {
+        fileName.textContent = '✓ ' + videoInput.files[0].name;
+        fileName.style.display = 'block';
+    }
+}
+
+videoForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (videoInput.files.length === 0) {
+        alert('Please select a video');
+        return;
+    }
+
+    // Validate number plate before submission
+    const plateValue = vehicleNumberPlate.value.trim();
+    const plateValidation = validateNumberPlate(plateValue);
+    
+    if (!plateValidation.valid) {
+        showPlateValidation(false, plateValidation.message);
+        vehicleNumberPlate.focus();
+        return;
+    }
+    
+    // Save number plate to localStorage if valid
+    if (plateValidation.valid && plateValue) {
+        saveNumberPlate(plateValue);
+    }
+
+    const formData = new FormData();
+    formData.append('video', videoInput.files[0]);
+
+    document.getElementById('loadingCard').style.display = 'block';
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('errorCard').style.display = 'none';
+
+    try {
+        const response = await fetch('{{ url_for("main.test_video") }}', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Show message if any
+            if (data.message) {
+                if (window.App && window.App.toast) {
+                    window.App.toast.info(data.message);
+                } else {
+                    alert(data.message);
+                }
+            }
+            
+            document.getElementById('resultWindows').textContent = data.windows_detected;
+            document.getElementById('resultTinted').textContent = data.tinted_windows;
+            document.getElementById('resultClear').textContent = data.clear_windows;
+            document.getElementById('resultFrames').textContent = data.frames_processed;
+            document.getElementById('resultConfidence').style.width = (data.average_confidence * 100) + '%';
+            document.getElementById('resultConfidencePercent').textContent = (data.average_confidence * 100).toFixed(1) + '%';
+            document.getElementById('resultTime').textContent = data.processing_time + 's';
+
+            document.getElementById('loadingCard').style.display = 'none';
+            document.getElementById('resultsCard').style.display = 'block';
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('errorCard').style.display = 'block';
+        document.getElementById('errorMessage').textContent = error.message;
+    }
+});
+</script>
+{% endblock %}

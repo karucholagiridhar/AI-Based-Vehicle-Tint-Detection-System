@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Test Logs - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 20px;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 32px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1 style="font-size: 2rem; color: var(--accent-green); margin-bottom: 8px;">📋 Test Logs</h1>
+                <p style="color: var(--text-gray);">All your detection test history</p>
+            </div>
+
+            <!-- Filter -->
+            <div style="display: flex; gap: 12px;">
+                <a href="{{ url_for('main.logs', type='all') }}" class="btn {% if filter_type == 'all' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
+                    All Tests
+                </a>
+                <a href="{{ url_for('main.logs', type='image') }}" class="btn {% if filter_type == 'image' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
+                    📷 Images
+                </a>
+                <a href="{{ url_for('main.logs', type='video') }}" class="btn {% if filter_type == 'video' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
+                    🎬 Videos
+                </a>
+                <a href="{{ url_for('main.logs', type='webcam') }}" class="btn {% if filter_type == 'webcam' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">
+                    📹 Webcam
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if logs %}
+        <!-- Logs Timeline -->
+        <div style="position: relative;">
+            {% for log in logs %}
+                <div class="card" style="margin-bottom: 16px; border-left: 4px solid {% if log.test_type == 'image' %}var(--accent-blue){% elif log.test_type == 'video' %}var(--accent-magenta){% else %}var(--accent-purple){% endif %};">
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px;">
+                        <!-- Left Content -->
+                        <div style="flex: 1; min-width: 300px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <span style="font-size: 1.5rem;">
+                                    {% if log.test_type == 'image' %}📷{% elif log.test_type == 'video' %}🎬{% else %}📹{% endif %}
+                                </span>
+                                <div>
+                                    <h3 style="color: var(--text-light); margin-bottom: 4px;">{{ log.original_filename }}</h3>
+                                    <p style="color: var(--text-dark-gray); font-size: 0.875rem;">
+                                        {{ log.created_at.strftime('%B %d, %Y at %H:%M:%S') }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Details Grid -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px;">
+                                <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 6px;">
+                                    <div style="color: var(--text-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Windows</div>
+                                    <div style="color: var(--accent-green); font-size: 1.25rem; font-weight: 700;">{{ log.windows_detected }}</div>
+                                </div>
+
+                                <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 6px;">
+                                    <div style="color: var(--text-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Tinted</div>
+                                    <div style="color: var(--accent-magenta); font-size: 1.25rem; font-weight: 700;">{{ log.tinted_windows }}</div>
+                                </div>
+
+                                <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 6px;">
+                                    <div style="color: var(--text-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Clear</div>
+                                    <div style="color: var(--accent-blue); font-size: 1.25rem; font-weight: 700;">{{ log.clear_windows }}</div>
+                                </div>
+
+                                <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 6px;">
+                                    <div style="color: var(--text-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Confidence</div>
+                                    <div style="color: var(--accent-blue); font-size: 1.25rem; font-weight: 700;">{{ "%.0f"|format(log.average_confidence * 100) }}%</div>
+                                </div>
+
+                                <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 6px;">
+                                    <div style="color: var(--text-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Time</div>
+                                    <div style="color: var(--text-light); font-size: 1.25rem; font-weight: 700;">{{ "%.2f"|format(log.processing_time) }}s</div>
+                                </div>
+
+                                <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 6px;">
+                                    <div style="color: var(--text-dark-gray); font-size: 0.75rem; text-transform: uppercase;">Status</div>
+                                    <span class="badge badge-success">{{ log.status }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Actions -->
+                        <div style="display: flex; gap: 8px; flex-direction: column; min-width: 150px;">
+                            <a href="{{ url_for('main.result_detail', result_id=log.id) }}" class="btn btn-secondary btn-sm" style="text-align: center;">
+                                View Details
+                            </a>
+                            {% if log.output_path %}
+                                <a href="{{ url_for('main.get_image', filename=log.output_path.split('/')[-1]) }}" download class="btn btn-secondary btn-sm" style="text-align: center;">
+                                    Download
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if pages > 1 %}
+            <div style="display: flex; justify-content: center; gap: 8px; margin-top: 32px;">
+                {% if current_page > 1 %}
+                    <a href="{{ url_for('main.logs', type=filter_type, page=1) }}" class="btn btn-sm btn-secondary">« First</a>
+                    <a href="{{ url_for('main.logs', type=filter_type, page=current_page-1) }}" class="btn btn-sm btn-secondary">‹ Prev</a>
+                {% endif %}
+
+                {% for page_num in range(1, pages + 1) %}
+                    {% if page_num == current_page %}
+                        <button class="btn btn-sm btn-primary" disabled>{{ page_num }}</button>
+                    {% elif page_num <= current_page + 2 and page_num >= current_page - 2 %}
+                        <a href="{{ url_for('main.logs', type=filter_type, page=page_num) }}" class="btn btn-sm btn-secondary">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if current_page < pages %}
+                    <a href="{{ url_for('main.logs', type=filter_type, page=current_page+1) }}" class="btn btn-sm btn-secondary">Next ›</a>
+                    <a href="{{ url_for('main.logs', type=filter_type, page=pages) }}" class="btn btn-sm btn-secondary">Last »</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- Empty State -->
+        <div class="card" style="text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">📭</div>
+            <h2 style="color: var(--text-gray); margin-bottom: 12px;">No Logs Found</h2>
+            <p style="color: var(--text-dark-gray); margin-bottom: 24px;">
+                {% if filter_type != 'all' %}
+                    No {{ filter_type }} tests have been run yet.
+                {% else %}
+                    You haven't run any tests yet.
+                {% endif %}
+            </p>
+            <a href="{{ url_for('main.test_page') }}" class="btn btn-primary btn-lg">
+                🚀 Start Testing
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

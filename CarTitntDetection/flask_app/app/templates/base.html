@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Professional AI-powered car tint detection system with real-time analysis">
+    <meta name="author" content="AI-Based Vehicle Tint Detection System">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    <title>{% block title %}AI-Based Vehicle Tint Detection - AI Surveillance{% endblock %}</title>
+    
+    <!-- ============================================
+         GLOBAL THEME INITIALIZATION
+         Apply theme BEFORE page renders to prevent flash
+         Reads from localStorage: 'appTheme'
+         Falls back to system preference or defaults to dark
+         ============================================ -->
+    <script>
+        // Immediately apply saved theme to prevent flash of wrong theme
+        (function() {
+            // Read theme from localStorage
+            const savedTheme = localStorage.getItem('appTheme');
+            
+            // Determine theme: savedTheme > system preference > dark (default)
+            let theme = 'dark'; // default
+            
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                theme = savedTheme;
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                theme = 'light';
+            }
+            
+            // Apply theme class to <body> immediately
+            // CSS will be loaded after this, so class is ready
+            if (theme === 'light') {
+                document.documentElement.classList.add('light-theme-loading');
+            } else {
+                document.documentElement.classList.add('dark-theme-loading');
+            }
+        })();
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/toast-loader.css') }}">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Apply theme immediately on body load -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('appTheme') || 
+                              (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+            document.body.classList.add(savedTheme === 'light' ? 'light-theme' : 'dark-theme');
+            document.documentElement.classList.remove('light-theme-loading', 'dark-theme-loading');
+        })();
+    </script>
+    {% if 'user_id' in session %}
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <a href="{{ url_for('main.dashboard') }}" class="navbar-brand">
+                    🚗 AI-Based Vehicle Tint Detection System
+                </a>
+                
+                <ul class="navbar-menu">
+                    <li><a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a></li>
+                    <li><a href="{{ url_for('main.test_page') }}" class="{% if 'test' in request.endpoint %}active{% endif %}">Test</a></li>
+                    <li><a href="{{ url_for('main.results') }}" class="{% if request.endpoint == 'main.results' %}active{% endif %}">Results</a></li>
+                    <li><a href="{{ url_for('main.stats') }}" class="{% if request.endpoint == 'main.stats' %}active{% endif %}">Analytics</a></li>
+                    <li><a href="{{ url_for('main.logs') }}" class="{% if request.endpoint == 'main.logs' %}active{% endif %}">Logs</a></li>
+                </ul>
+                
+                <div class="navbar-user">
+                    <div class="user-menu">
+                        <div class="user-avatar" onclick="toggleDropdown()" id="headerAvatar">
+                            <!-- Profile Picture (hidden initially) -->
+                            <img id="headerProfilePicture" src="" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: none;">
+                            <!-- Initial Letter (shown when no picture) -->
+                            <span id="headerInitial">{{ session.get('username', 'U')[0].upper() }}</span>
+                        </div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="{{ url_for('main.profile') }}">👤 Profile</a>
+                            <a href="{{ url_for('auth.logout') }}" onclick="return confirm('Are you sure you want to logout?')">🚪 Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="container" style="margin-top: 20px;">
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Welcome Message Modal -->
+    <div id="welcomeModal" class="welcome-modal-overlay" style="display: none;" role="dialog" aria-labelledby="welcomeTitle" aria-modal="true">
+        <div class="welcome-modal">
+            <!-- Close Button -->
+            <button class="welcome-modal-close" onclick="closeWelcomeModal()" aria-label="Close welcome message">
+                <span>✕</span>
+            </button>
+
+            <!-- Modal Content -->
+            <div class="welcome-modal-content">
+                <!-- Icon/Logo - Animation stage 1: Zoom-in with rotation -->
+                <div class="welcome-modal-icon welcome-animate-icon">
+                    <span class="welcome-icon-bg">🚗</span>
+                </div>
+
+                <!-- Title - Animation stage 2: Slide up with scale -->
+                <h2 id="welcomeTitle" class="welcome-modal-title welcome-animate-title">
+                    Welcome to AI-Based Vehicle Tint Detection System
+                </h2>
+
+                <!-- Action Button - Animation stage 3: Bounce in with scale -->
+                <div class="welcome-modal-actions welcome-animate-button">
+                    <button 
+                        class="btn btn-primary btn-lg" 
+                        onclick="closeWelcomeModal()"
+                        style="width: 100%;"
+                    >
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: rgba(5, 7, 17, 0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border-light); padding: 32px 0; margin-top: 80px; text-align: center;">
+        <div class="container">
+            <p style="color: var(--text-secondary); font-weight: 500; margin-bottom: 8px;">&copy; 2026 Government-Grade Enforcement & Compliance Monitoring. All rights reserved.</p>
+            <p style="font-size: 0.875rem; color: var(--text-muted); background: var(--gradient-success); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 600;">Powered by AI & Computer Vision Technology</p>
+        </div>
+    </footer>
+
+    <!-- Core JavaScript Libraries -->
+    <script src="{{ url_for('static', filename='js/api/client.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api/profile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api/inference.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/toast.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/loader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/utils/validation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    <script>
+        // Toggle user dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const avatar = document.querySelector('.user-avatar');
+            if (dropdown && !dropdown.contains(event.target) && !avatar.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        document.querySelectorAll('.alert').forEach(alert => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 300);
+            }, 5000);
+        });
+
+        // ============================================
+        // HEADER AVATAR PROFILE PICTURE MANAGEMENT
+        // Loads and displays profile picture in navbar
+        // ============================================
+
+        /**
+         * Load and display profile picture in header avatar
+         * Called on page load and when picture is updated
+         */
+        function loadHeaderProfilePicture() {
+            const savedPicture = localStorage.getItem('userProfilePicture');
+            const headerImg = document.getElementById('headerProfilePicture');
+            const headerInitial = document.getElementById('headerInitial');
+            
+            if (savedPicture && headerImg && headerInitial) {
+                // Show profile picture
+                headerImg.src = savedPicture;
+                headerImg.style.display = 'block';
+                headerInitial.style.display = 'none';
+            } else if (headerImg && headerInitial) {
+                // Show initial letter
+                headerImg.style.display = 'none';
+                headerInitial.style.display = 'flex';
+            }
+        }
+
+        /**
+         * Listen for profile picture changes
+         * Updates header when picture is uploaded or removed
+         */
+        window.addEventListener('profilePictureChanged', loadHeaderProfilePicture);
+
+        // Initialize header profile picture on page load
+        document.addEventListener('DOMContentLoaded', loadHeaderProfilePicture);
+    </script>
+
+    <script>
+        // ============================================
+        // WELCOME MESSAGE MODAL
+        // Shows once per browser session on first website entry
+        // ============================================
+
+        /**
+         * Check if welcome message should be shown
+         * Shows once per browser session (first entry)
+         * Uses sessionStorage to track if already shown in current session
+         * @returns {boolean} - true if should show, false if already shown
+         */
+        function shouldShowWelcomeMessage() {
+            // Check sessionStorage for the "welcomeShown" flag
+            // This flag persists for the current browser session/tab
+            // It's cleared when the browser/tab is closed
+            const welcomeShown = sessionStorage.getItem('welcomeShown');
+            
+            // If flag exists, welcome was already shown in this session
+            if (welcomeShown === 'true') {
+                return false; // Don't show again
+            }
+            
+            // Flag not set - this is first entry in session
+            return true; // Show welcome message
+        }
+
+        /**
+         * Display the welcome modal with smooth, elegant animations
+         * Implements hardware-accelerated entrance sequence with careful timing
+         * 
+         * Animation sequence (total duration: ~900ms):
+         *   Stage 1: Background overlay fade-in + blur (0ms - 500ms)
+         *   Stage 2: Modal container scale + slide up (100ms - 700ms)
+         *   Stage 3: Icon zoom-in with rotation (200ms - 900ms)
+         *   Stage 4: Title slide up with scale (400ms - 1000ms)
+         *   Stage 5: Button bounce-in with scale (600ms - 1200ms)
+         */
+        function showWelcomeModal() {
+            const modal = document.getElementById('welcomeModal');
+            if (!modal) return;
+            
+            // Reset all animations before showing (enables modal to be reopened)
+            const animatedElements = modal.querySelectorAll(
+                '.welcome-animate-icon, .welcome-animate-title, .welcome-animate-button'
+            );
+            animatedElements.forEach(el => {
+                el.classList.remove('welcome-animated');
+            });
+            
+            // Display the modal container (initially transparent)
+            modal.style.display = 'flex';
+            
+            // Stage 1: Trigger overlay fade-in using requestAnimationFrame for smooth 60fps rendering
+            requestAnimationFrame(() => {
+                // Activate background overlay (fade + blur effect)
+                modal.classList.add('active');
+                
+                // Stage 2-5: Orchestrate staggered element animations
+                // Small delay after overlay starts for visual hierarchy
+                setTimeout(() => {
+                    // Stage 3: Icon entrance (200ms)
+                    // Dramatic zoom-in with rotation effect
+                    const icon = modal.querySelector('.welcome-animate-icon');
+                    if (icon) icon.classList.add('welcome-animated');
+                    
+                    // Stage 4: Title entrance (400ms total, 200ms after icon)
+                    // Slide up with subtle scale for depth
+                    setTimeout(() => {
+                        const title = modal.querySelector('.welcome-animate-title');
+                        if (title) title.classList.add('welcome-animated');
+                    }, 200);
+                    
+                    // Stage 5: Button entrance (600ms total, 200ms after title)
+                    // Playful bounce-in with scale overshoot
+                    setTimeout(() => {
+                        const button = modal.querySelector('.welcome-animate-button');
+                        if (button) button.classList.add('welcome-animated');
+                    }, 400);
+                    
+                }, 100);
+            });
+            
+            // Focus management - set focus to close button after animations complete
+            // Ensures keyboard accessibility while allowing animations to finish
+            setTimeout(() => {
+                const closeBtn = modal.querySelector('.welcome-modal-close');
+                if (closeBtn) {
+                    closeBtn.focus();
+                }
+            }, 900);
+            
+            // Prevent body scroll when modal is open (UX best practice)
+            document.body.style.overflow = 'hidden';
+            
+            // Add keyboard event listener for ESC key (accessibility)
+            document.addEventListener('keydown', handleWelcomeModalEscape);
+            
+            // Add overlay click handler for backdrop dismissal
+            modal.addEventListener('click', handleWelcomeModalOverlayClick);
+        }
+
+        /**
+         * Close the welcome modal
+         * Implements smooth exit animation
+         * Sets sessionStorage flag to prevent showing again in current session
+         */
+        function closeWelcomeModal() {
+            const modal = document.getElementById('welcomeModal');
+            
+            if (!modal) return;
+            
+            // Set sessionStorage flag to prevent showing again in this session
+            // This flag persists until browser/tab is closed
+            sessionStorage.setItem('welcomeShown', 'true');
+            console.log('✓ Welcome message shown - will not display again this session');
+            
+            // Exit animation: Remove 'active' class to trigger fade-out
+            modal.classList.remove('active');
+            
+            // Hide after animation completes (300ms)
+            setTimeout(() => {
+                modal.style.display = 'none';
+                // Restore body scroll
+                document.body.style.overflow = '';
+            }, 300);
+            
+            // Remove keyboard event listener
+            document.removeEventListener('keydown', handleWelcomeModalEscape);
+        }
+
+        /**
+         * Handle ESC key to close modal (accessibility)
+         * @param {KeyboardEvent} e - The keyboard event
+         */
+        function handleWelcomeModalEscape(e) {
+            if (e.key === 'Escape') {
+                closeWelcomeModal();
+            }
+        }
+
+        /**
+         * Close modal when clicking outside (on overlay)
+         * @param {MouseEvent} event - The click event
+         */
+        function handleWelcomeModalOverlayClick(event) {
+            const modal = document.getElementById('welcomeModal');
+            if (event.target === modal) {
+                closeWelcomeModal();
+            }
+        }
+
+        /**
+         * Initialize welcome modal on page load
+         * Shows modal on first website entry in browser session
+         * Uses sessionStorage "welcomeShown" flag for session-based tracking
+         */
+        function initWelcomeModal() {
+            // Check if we should show the welcome message
+            // Shows once per browser session (first entry)
+            if (shouldShowWelcomeMessage()) {
+                // Small delay for better UX (let page load first)
+                setTimeout(() => {
+                    showWelcomeModal();
+                }, 500);
+            }
+            
+            // Add click listener to overlay for closing
+            const modal = document.getElementById('welcomeModal');
+            if (modal) {
+                modal.addEventListener('click', handleWelcomeModalOverlayClick);
+            }
+        }
+
+        /**
+         * Manual function to test welcome message (for development)
+         * Can be called from browser console: testWelcomeMessage()
+         */
+        function testWelcomeMessage() {
+            // Clear the flag to simulate first entry
+            sessionStorage.removeItem('welcomeShown');
+            console.log('Welcome message flag cleared - reload page to see modal');
+            alert('Reload the page to see the welcome modal');
+        }
+
+        // Initialize welcome modal when DOM is ready
+        document.addEventListener('DOMContentLoaded', initWelcomeModal);
+    </script>
+
+    <!-- ============================================
+         GLOBAL THEME SYSTEM
+         Manages light/dark theme across entire application
+         ============================================ -->
+    <script>
+        // ============================================
+        // GLOBAL THEME MANAGEMENT
+        // Applies theme to entire app, accessible from all pages
+        // localStorage key: 'appTheme' (values: 'light' | 'dark')
+        // ============================================
+
+        /**
+         * Apply theme to the entire application
+         * Updates body class which triggers CSS theme variables
+         * @param {string} theme - 'light' or 'dark'
+         */
+        function applyGlobalTheme(theme) {
+            const body = document.body;
+            
+            if (theme === 'light') {
+                body.classList.add('light-theme');
+                body.classList.remove('dark-theme');
+            } else {
+                body.classList.add('dark-theme');
+                body.classList.remove('light-theme');
+            }
+            
+            // Update theme toggle UI if it exists (on Profile page)
+            updateThemeToggleUI(theme);
+            
+            console.log(`✓ Global theme applied: ${theme}`);
+        }
+
+        /**
+         * Update theme toggle UI elements (if they exist on current page)
+         * @param {string} theme - 'light' or 'dark'
+         */
+        function updateThemeToggleUI(theme) {
+            const themeToggle = document.getElementById('themeToggle');
+            const themeLabel = document.getElementById('themeLabel');
+            
+            if (themeToggle) {
+                themeToggle.checked = (theme === 'dark');
+            }
+            
+            if (themeLabel) {
+                // Update label text (handles multi-language if available)
+                if (typeof getTranslation === 'function' && typeof loadSavedLanguage === 'function') {
+                    const currentLang = loadSavedLanguage();
+                    themeLabel.textContent = getTranslation(
+                        theme === 'light' ? 'theme_light' : 'theme_dark', 
+                        currentLang
+                    );
+                } else {
+                    themeLabel.textContent = theme === 'light' ? 'Light Mode' : 'Dark Mode';
+                }
+            }
+        }
+
+        /**
+         * Toggle between light and dark theme (called from theme toggle UI)
+         * Saves preference to localStorage and applies globally
+         */
+        function toggleGlobalTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            const newTheme = themeToggle && themeToggle.checked ? 'dark' : 'light';
+            
+            // Save to localStorage for persistence
+            localStorage.setItem('appTheme', newTheme);
+            localStorage.setItem('appThemeTimestamp', new Date().toISOString());
+            
+            // Apply theme globally
+            applyGlobalTheme(newTheme);
+        }
+
+        /**
+         * Load saved theme from localStorage
+         * Falls back to system preference, then defaults to dark
+         * @returns {string} - 'light' or 'dark'
+         */
+        function loadSavedTheme() {
+            // Check localStorage first (user preference)
+            const savedTheme = localStorage.getItem('appTheme');
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                return savedTheme;
+            }
+            
+            // Check system preference
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                return 'light';
+            }
+            
+            // Default to dark theme
+            return 'dark';
+        }
+
+        /**
+         * Initialize global theme system on page load
+         * Applies saved theme and sets up event listeners
+         */
+        function initGlobalThemeSystem() {
+            // Load and apply saved theme
+            const currentTheme = loadSavedTheme();
+            applyGlobalTheme(currentTheme);
+            
+            // Add event listener to theme toggle if it exists
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('change', toggleGlobalTheme);
+            }
+            
+            // Listen for system theme preference changes
+            if (window.matchMedia) {
+                const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                darkModeQuery.addEventListener('change', (e) => {
+                    // Only auto-update if user hasn't set a preference
+                    const savedTheme = localStorage.getItem('appTheme');
+                    if (!savedTheme) {
+                        const newTheme = e.matches ? 'dark' : 'light';
+                        applyGlobalTheme(newTheme);
+                    }
+                });
+            }
+        }
+
+        // Initialize theme system when DOM is ready
+        document.addEventListener('DOMContentLoaded', initGlobalThemeSystem);
+
+        // Expose theme functions globally for Profile page and other components
+        window.applyGlobalTheme = applyGlobalTheme;
+        window.toggleGlobalTheme = toggleGlobalTheme;
+        window.loadSavedTheme = loadSavedTheme;
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
