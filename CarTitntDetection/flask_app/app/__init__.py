@@ -13,6 +13,15 @@ def create_app(config_name='development'):
     # Load configuration
     app.config.from_object(config_by_name.get(config_name, 'development'))
     
+    # Create upload directory if it doesn't exist
+    upload_folder = app.config.get('UPLOAD_FOLDER')
+    if upload_folder and not os.path.exists(upload_folder):
+        try:
+            os.makedirs(upload_folder, exist_ok=True)
+            app.logger.info(f'Created upload folder: {upload_folder}')
+        except Exception as e:
+            app.logger.warning(f'Could not create upload folder {upload_folder}: {e}')
+    
     # Initialize database
     db.init_app(app)
     

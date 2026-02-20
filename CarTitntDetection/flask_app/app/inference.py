@@ -61,6 +61,9 @@ class InferenceManager:
             
             processing_time = time.time() - start_time
             
+            # Extract predictions from result
+            predictions = result.get('predictions', [])
+            
             # Scale predictions back to original image size
             for pred in predictions:
                 if scale < 1.0:  # If image was resized

@@ -83,9 +83,20 @@ def dashboard():
         func.date(TestResult.created_at)
     ).all()
     
+    # Create a dict for quick lookup
+    test_counts = {str(d[0]): d[1] for d in daily_tests}
+    
+    # Generate all 7 days with counts (0 if no tests)
+    dates = []
+    counts = []
+    for i in range(6, -1, -1):  # 6 days ago to today
+        date = (datetime.utcnow() - timedelta(days=i)).strftime('%Y-%m-%d')
+        dates.append(date)
+        counts.append(test_counts.get(date, 0))
+    
     chart_data = {
-        'dates': [str(d[0]) for d in daily_tests],
-        'counts': [d[1] for d in daily_tests]
+        'dates': dates,
+        'counts': counts
     }
     
     return render_template(

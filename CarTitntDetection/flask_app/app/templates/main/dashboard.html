@@ -223,7 +223,7 @@
     if (typeof Chart !== 'undefined') {
         const chartData = {{ chart_data | safe }};
         
-        if (chartData.dates && chartData.counts) {
+        if (chartData && chartData.dates && chartData.counts && chartData.dates.length > 0) {
             // Show loader
             const chartLoader = document.getElementById('chartLoader');
             const chartCanvas = document.getElementById('activityChart');
@@ -233,11 +233,17 @@
                 chartCanvas.style.opacity = '0';
             }
             
+            // Format dates to show Mon, Tue, etc.
+            const formattedDates = chartData.dates.map(dateStr => {
+                const date = new Date(dateStr + 'T00:00:00');
+                return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            });
+            
             const ctx = chartCanvas.getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: chartData.dates,
+                    labels: formattedDates,
                     datasets: [{
                         label: 'Tests',
                         data: chartData.counts,
@@ -256,34 +262,58 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    onComplete: function() {
-                        // Hide loader when chart is ready
-                        const chartLoader = document.getElementById('chartLoader');
-                        const chartCanvas = document.getElementById('activityChart');
-                        if (chartLoader) {
-                            chartLoader.style.display = 'none';
-                            chartCanvas.style.opacity = '1';
+                    animation: {
+                        onComplete: function() {
+                            // Hide loader when chart is ready
+                            const chartLoader = document.getElementById('chartLoader');
+                            const chartCanvas = document.getElementById('activityChart');
+                            if (chartLoader) {
+                                chartLoader.style.display = 'none';
+                                chartCanvas.style.opacity = '1';
+                            }
                         }
                     },
                     plugins: {
                         legend: {
                             display: true,
                             labels: { color: '#f3f4f6', font: { size: 12 } }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                            titleColor: '#f3f4f6',
+                            bodyColor: '#f3f4f6',
+                            borderColor: '#22c55e',
+                            borderWidth: 1
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(75, 85, 99, 0.2)' },
-                            ticks: { color: '#f3f4f6' }
+                            ticks: { 
+                                color: '#f3f4f6',
+                                stepSize: 1,
+                                precision: 0
+                            },
+                            grid: { color: 'rgba(75, 85, 99, 0.2)' }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#f3f4f6' }
+                            ticks: { 
+                                color: '#f3f4f6',
+                                maxRotation: 45,
+                                minRotation: 0
+                            }
                         }
                     }
                 }
             });
+        } else {
+            // Hide loader and show message if no data
+            const chartLoader = document.getElementById('chartLoader');
+            if (chartLoader) {
+                chartLoader.innerHTML = '<div style="color: var(--text-muted); font-size: 0.9375rem;">No activity data available</div>';
+                chartLoader.style.display = 'block';
+            }
         }
     }
 </script>
