@@ -7,7 +7,7 @@ class Config:
     # Flask
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
     
-    # Database - Support both SQLite (dev) and PostgreSQL (production)
+    # Database - Support SQLite (dev), MySQL, and PostgreSQL (production)
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///car_tint_detection.db'
     # Fix for Heroku postgres:// -> postgresql://
     if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
