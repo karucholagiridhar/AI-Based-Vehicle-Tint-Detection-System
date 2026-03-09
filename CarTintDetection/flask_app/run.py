@@ -5,6 +5,11 @@ Real-Time Detection of Black-Tinted Vehicle Glasses Using AI
 
 import os
 import sys
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from app import create_app, db
 from app.models import User, TestResult, PerformanceLog
 

@@ -180,14 +180,38 @@ def test_image():
             
             predictions = result['predictions']
             
+            # Filter predictions to only include car windows (tinted/clear) with good confidence
+            MIN_CONFIDENCE = 0.10  # 10% minimum confidence - lenient to catch all detections
+            filtered_predictions = [
+                p for p in predictions 
+                if p.get('class', '').lower() in ['tinted', 'clear'] 
+                and p.get('confidence', 0) >= MIN_CONFIDENCE
+            ]
+            
+            # Log what we're detecting for debugging
+            print(f"\nImage Upload Detection Results:")
+            print(f"  Total API predictions: {len(predictions)}")
+            print(f"  After filtering (confidence >= {MIN_CONFIDENCE:.0%}): {len(filtered_predictions)}")
+            
+            if filtered_predictions:
+                print(f"  Detected windows:")
+                for i, p in enumerate(filtered_predictions, 1):
+                    print(f"    {i}. {p.get('class', 'unknown').upper()}: {p.get('confidence', 0):.2%} confidence")
+            else:
+                print("  No windows detected after filtering.")
+                if predictions:
+                    print(f"  All raw predictions:")
+                    for i, p in enumerate(predictions, 1):
+                        print(f"    {i}. {p.get('class', 'unknown')}: {p.get('confidence', 0):.2%}")
+            
             # Draw predictions
             output_filename = f"output_{timestamp}.jpg"
             output_path = os.path.join(Config.UPLOAD_FOLDER, output_filename)
             
-            draw_result = inference_manager.draw_predictions(filepath, predictions, output_path)
+            draw_result = inference_manager.draw_predictions(filepath, filtered_predictions, output_path)
             
             # Calculate statistics
-            stats = inference_manager.calculate_statistics([predictions])
+            stats = inference_manager.calculate_statistics([filtered_predictions])
             
             # Save to database
             test_result = TestResult(
@@ -215,7 +239,11 @@ def test_image():
             # Prepare response message
             message = None
             if draw_result['total_count'] == 0:
-                message = "No tinted windows detected in this image. The AI did not find any vehicle windows or tinted glass."
+                message = "No car windows detected. Please upload an image with a clear view of vehicle windows."
+            elif draw_result['tinted_count'] == 0:
+                message = f"Detected {draw_result['clear_count']} clear window(s). No tinted windows found - vehicle is compliant."
+            else:
+                message = f"Violation detected: {draw_result['tinted_count']} tinted window(s) out of {draw_result['total_count']} total windows."
             
             return jsonify({
                 'success': True,
@@ -283,10 +311,19 @@ def test_video():
             all_predictions = []
             processing_times = []
             
+            # Minimum confidence threshold for car windows
+            MIN_CONFIDENCE = 0.12  # 12% threshold - lenient to catch all tinted windows
+            
             for idx, frame_info in enumerate(frames):
                 result = inference_manager.run_inference(frame_info['path'])
                 if result['success']:
-                    all_predictions.extend(result['predictions'])
+                    # Filter to only car windows (tinted/clear) with good confidence
+                    filtered_preds = [
+                        p for p in result['predictions']
+                        if p.get('class', '').lower() in ['tinted', 'clear']
+                        and p.get('confidence', 0) >= MIN_CONFIDENCE
+                    ]
+                    all_predictions.extend(filtered_preds)
                     processing_times.append(result['processing_time'])
             
             # Calculate statistics
@@ -387,7 +424,7 @@ def test_webcam():
             with open(filepath, 'wb') as f:
                 f.write(image_bytes)
             
-            # Run inference
+            # Run inference with multi-strategy approach (same as image uploads)
             result = inference_manager.run_inference(filepath)
             
             if not result['success']:
@@ -410,14 +447,40 @@ def test_webcam():
             
             predictions = result['predictions']
             
+            # Filter predictions to only include car windows (tinted/clear) with good confidence
+            # Using same threshold as image uploads for consistency
+            MIN_CONFIDENCE = 0.10  # 10% minimum confidence - very lenient for webcam to catch all detections
+            
+            filtered_predictions = [
+                p for p in predictions 
+                if p.get('class', '').lower() in ['tinted', 'clear'] 
+                and p.get('confidence', 0) >= MIN_CONFIDENCE
+            ]
+            
+            # Log what we're detecting for debugging
+            print(f"\nWebcam Detection Results:")
+            print(f"  Total API predictions: {len(predictions)}")
+            print(f"  After filtering (confidence >= {MIN_CONFIDENCE:.0%}): {len(filtered_predictions)}")
+            
+            if filtered_predictions:
+                print(f"  Detected windows:")
+                for i, p in enumerate(filtered_predictions, 1):
+                    print(f"    {i}. {p.get('class', 'unknown').upper()}: {p.get('confidence', 0):.2%} confidence")
+            else:
+                print("  No windows detected after filtering.")
+                if predictions:
+                    print(f"  All raw predictions:")
+                    for i, p in enumerate(predictions, 1):
+                        print(f"    {i}. {p.get('class', 'unknown')}: {p.get('confidence', 0):.2%}")
+            
             # Draw predictions
             output_filename = f"webcam_output_{timestamp}.jpg"
             output_path = os.path.join(Config.UPLOAD_FOLDER, output_filename)
             
-            draw_result = inference_manager.draw_predictions(filepath, predictions, output_path)
+            draw_result = inference_manager.draw_predictions(filepath, filtered_predictions, output_path)
             
             # Calculate statistics
-            stats = inference_manager.calculate_statistics([predictions])
+            stats = inference_manager.calculate_statistics([filtered_predictions])
             
             # Save to database
             test_result = TestResult(
@@ -445,7 +508,11 @@ def test_webcam():
             # Prepare response message
             message = None
             if draw_result['total_count'] == 0:
-                message = "No tinted windows detected in this webcam capture. The AI did not find any vehicle windows or tinted glass."
+                message = "No car windows detected. Please ensure a vehicle is clearly visible in the frame."
+            elif draw_result['tinted_count'] == 0:
+                message = f"Detected {draw_result['clear_count']} clear window(s). No tinted windows found - vehicle is compliant."
+            else:
+                message = f"Violation detected: {draw_result['tinted_count']} tinted window(s) out of {draw_result['total_count']} total windows."
             
             return jsonify({
                 'success': True,

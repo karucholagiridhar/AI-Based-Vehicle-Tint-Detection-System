@@ -1,0 +1,22 @@
+# Core Dependencies
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+SQLAlchemy==2.0.21
+Werkzeug==2.3.7
+python-dotenv==1.0.0
+
+# Database Drivers
+pymysql>=1.1.0
+cryptography>=41.0.0
+
+# AI/ML Dependencies
+inference-sdk>=0.22.0
+opencv-python>=4.10.0.84
+Pillow>=10.0.0
+numpy>=2.0.0,<2.4.0
+requests>=2.32.0
+
+# Production Dependencies (optional for development)
+# Uncomment these when deploying to production
+# gunicorn==21.2.0
+# psycopg2-binary==2.9.9

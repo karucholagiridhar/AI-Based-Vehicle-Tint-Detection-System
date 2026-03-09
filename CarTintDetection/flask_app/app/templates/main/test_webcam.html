@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+
+{% block title %}Test Webcam - AI-Based Vehicle Tint Detection{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 40px 20px;">
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 2rem; color: var(--accent-green); margin-bottom: 8px;">📹 Live Webcam Test</h1>
+        <p style="color: var(--text-gray);">Capture images from your webcam for real-time detection</p>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- Webcam Area -->
+        <div>
+            <div class="card">
+                <h2 style="color: var(--accent-blue); margin-bottom: 20px;">🎥 Webcam Stream</h2>
+                
+                <div style="position: relative; margin-bottom: 16px;">
+                    <video 
+                        id="webcam" 
+                        autoplay 
+                        playsinline 
+                        style="
+                            width: 100%; 
+                            height: auto;
+                            min-height: 360px;
+                            max-height: 480px;
+                            border-radius: 8px; 
+                            background-color: var(--primary-darker); 
+                            object-fit: cover;
+                            display: block;
+                        "
+                    ></video>
+                    
+                    <!-- Detection Guide Overlay -->
+                    <div id="detectionGuide" style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        width: 70%;
+                        height: 60%;
+                        border: 3px dashed rgba(16, 185, 129, 0.6);
+                        border-radius: 12px;
+                        pointer-events: none;
+                        display: none;
+                        z-index: 10;
+                    ">
+                        <div style="
+                            position: absolute;
+                            top: -35px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            background: rgba(16, 185, 129, 0.9);
+                            color: white;
+                            padding: 6px 16px;
+                            border-radius: 20px;
+                            font-size: 0.875rem;
+                            font-weight: 600;
+                            white-space: nowrap;
+                        ">
+                            🚗 Position vehicle within frame
+                        </div>
+                    </div>
+                    
+                    <div id="webcamPlaceholder" style="
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(135deg, var(--primary-darker) 0%, var(--primary-dark) 100%);
+                        border-radius: 8px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        text-align: center;
+                        padding: 20px;
+                    ">
+                        <div style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;">📹</div>
+                        <h3 style="color: var(--text-light); margin-bottom: 8px; font-size: 1.25rem;">Webcam Not Started</h3>
+                        <p style="color: var(--text-muted); font-size: 0.875rem; max-width: 300px;">
+                            Click "Start Webcam" below to begin live vehicle tint detection
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Vehicle Number Plate Input -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="vehicleNumberPlate" class="form-label" style="display: flex; align-items: center; gap: 8px; color: var(--text-primary); font-weight: 600; margin-bottom: 8px;">
+                        <span>🚗</span>
+                        <span>Vehicle Number Plate (Optional)</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="vehicleNumberPlate" 
+                        name="vehicleNumberPlate"
+                        class="form-input" 
+                        placeholder="e.g., AP09AB1234"
+                        maxlength="15"
+                        style="text-transform: uppercase; font-weight: 600; letter-spacing: 1px;"
+                        aria-label="Vehicle number plate input"
+                    >
+                    <p id="plateValidationMsg" style="font-size: 0.8125rem; margin-top: 6px; display: none;"></p>
+                    <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">
+                        Enter the vehicle registration number
+                    </p>
+                </div>
+
+                <!-- Auto-Capture Toggle -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                        <input type="checkbox" id="autoCapture" style="width: 20px; height: 20px; cursor: pointer;">
+                        <span style="color: var(--text-primary); font-weight: 600;">🤖 Auto-Capture & Analyze (detects vehicles automatically)</span>
+                    </label>
+                    <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">
+                        Automatically captures and analyzes when motion is detected
+                    </p>
+                </div>
+
+                <div style="display: flex; gap: 12px;">
+                    <button id="startBtn" class="btn btn-secondary" style="flex: 1;">
+                        ▶️ Start Webcam
+                    </button>
+                    <button id="captureBtn" class="btn btn-primary" style="flex: 1;" disabled>
+                        📸 Manual Capture
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger" style="flex: 1;" disabled>
+                        ⏹️ Stop
+                    </button>
+                </div>
+                
+                <div id="detectionStatus" style="margin-top: 12px; padding: 10px; border-radius: 6px; display: none; text-align: center; font-weight: 600;">
+                    <span id="detectionText"></span>
+                </div>
+                
+                <!-- Detection Tips -->
+                <div style="margin-top: 16px; padding: 12px; background-color: rgba(59, 130, 246, 0.1); border-left: 4px solid var(--accent-blue); border-radius: 6px;">
+                    <h4 style="color: var(--accent-blue); margin-bottom: 8px; font-size: 0.875rem; font-weight: 700;">💡 Tips for Best Detection:</h4>
+                    <ul style="color: var(--text-gray); font-size: 0.8125rem; margin: 0; padding-left: 20px; line-height: 1.6;">
+                        <li>Position vehicle within the green guide frame</li>
+                        <li>Ensure side windows are clearly visible</li>
+                        <li>Use good lighting (avoid backlighting)</li>
+                        <li>Keep vehicle stationary for 1-2 seconds</li>
+                        <li>Capture from a slight angle (30-45 degrees)</li>
+                    </ul>
+                </div>
+
+                <canvas id="canvas" style="display: none;"></canvas>
+            </div>
+        </div>
+
+        <!-- Results Area -->
+        <div>
+            <div class="card" id="resultsCard" style="display: none;">
+                <h2 style="color: var(--accent-green); margin-bottom: 20px;">✅ Webcam Analysis Results</h2>
+                
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Windows Detected</label>
+                        <p style="color: var(--accent-green); font-size: 1.75rem; font-weight: 700;" id="resultWindows">0</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--accent-magenta);">
+                            <div style="font-size: 0.875rem; color: var(--text-dark-gray);">Tinted</div>
+                            <div style="color: var(--accent-magenta); font-size: 1.5rem; font-weight: 700;" id="resultTinted">0</div>
+                        </div>
+
+                        <div style="background-color: var(--primary-darker); padding: 12px; border-radius: 8px; text-align: center; border-left: 4px solid var(--accent-blue);">
+                            <div style="font-size: 0.875rem; color: var(--text-dark-gray);">Clear</div>
+                            <div style="color: var(--accent-blue); font-size: 1.5rem; font-weight: 700;" id="resultClear">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Confidence</label>
+                        <div class="progress">
+                            <div class="progress-bar" id="resultConfidence" style="width: 0%;"></div>
+                        </div>
+                        <p style="color: var(--accent-green); font-weight: 600; margin-top: 4px;" id="resultConfidencePercent">0%</p>
+                    </div>
+
+                    <div>
+                        <label style="color: var(--text-dark-gray); font-weight: 600;">Processing Time</label>
+                        <p style="color: var(--text-light);" id="resultTime">0s</p>
+                    </div>
+                </div>
+
+                <div id="outputImageContainer" style="margin-top: 20px;">
+                    <p style="color: var(--text-dark-gray); font-weight: 600; margin-bottom: 12px;">Annotated Output</p>
+                    <img 
+                        id="outputImage" 
+                        src="" 
+                        alt="Detection Output" 
+                        style="
+                            width: 100%; 
+                            height: auto;
+                            border-radius: 8px; 
+                            border: 2px solid var(--border-color);
+                            background-color: var(--primary-darker);
+                        "
+                    >
+                </div>
+
+                <a id="downloadLink" href="#" download class="btn btn-secondary btn-block" style="margin-top: 16px;">
+                    ⬇️ Download Result
+                </a>
+            </div>
+
+            <div id="loadingCard" class="card" style="display: none; text-align: center;">
+                <div class="spinner" style="width: 48px; height: 48px; border-width: 4px; margin: 20px auto;"></div>
+                <p style="color: var(--text-gray);">Analyzing capture...</p>
+            </div>
+
+            <div id="errorCard" class="card" style="display: none; background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid var(--error-color);">
+                <h3 style="color: var(--error-color); margin-bottom: 12px;">❌ Error</h3>
+                <p id="errorMessage" style="color: var(--error-color);"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const webcam = document.getElementById('webcam');
+const canvas = document.getElementById('canvas');
+const startBtn = document.getElementById('startBtn');
+const captureBtn = document.getElementById('captureBtn');
+const stopBtn = document.getElementById('stopBtn');
+const vehicleNumberPlate = document.getElementById('vehicleNumberPlate');
+const plateValidationMsg = document.getElementById('plateValidationMsg');
+const autoCapture = document.getElementById('autoCapture');
+const detectionStatus = document.getElementById('detectionStatus');
+const detectionText = document.getElementById('detectionText');
+
+let stream = null;
+let autoCaptureInterval = null;
+let lastFrameData = null;
+let isProcessing = false;
+let motionThreshold = 45; // Sensitivity for motion detection (balanced)
+let captureDelay = 3000; // Delay between auto-captures (3 seconds)
+let motionDetectedTime = null; // Track when motion was first detected
+let motionStableDelay = 800; // Wait 0.8s for vehicle to be stable before capturing
+
+// ============================================
+// VEHICLE NUMBER PLATE MANAGEMENT
+// ============================================
+
+function loadSavedNumberPlate() {
+    const savedPlate = localStorage.getItem('vehicleNumberPlate');
+    if (savedPlate && vehicleNumberPlate) {
+        vehicleNumberPlate.value = savedPlate;
+    }
+}
+
+function validateNumberPlate(plate) {
+    if (!plate || plate.trim() === '') {
+        return { valid: true, message: '' };
+    }
+    
+    plate = plate.replace(/\s/g, '').toUpperCase();
+    
+    const alphanumericRegex = /^[A-Z0-9]+$/;
+    if (!alphanumericRegex.test(plate)) {
+        return { 
+            valid: false, 
+            message: '❌ Only letters and numbers allowed (no special characters)' 
+        };
+    }
+    
+    if (plate.length < 4) {
+        return { 
+            valid: false, 
+            message: '❌ Number plate should be at least 4 characters' 
+        };
+    }
+    
+    if (plate.length > 15) {
+        return { 
+            valid: false, 
+            message: '❌ Number plate should not exceed 15 characters' 
+        };
+    }
+    
+    return { 
+        valid: true, 
+        message: '✅ Valid number plate format' 
+    };
+}
+
+function showPlateValidation(valid, message) {
+    if (!message) {
+        plateValidationMsg.style.display = 'none';
+        return;
+    }
+    
+    plateValidationMsg.textContent = message;
+    plateValidationMsg.style.display = 'block';
+    plateValidationMsg.style.color = valid ? 'var(--accent-success)' : 'var(--accent-danger)';
+}
+
+function saveNumberPlate(plate) {
+    if (plate && plate.trim() !== '') {
+        const cleanPlate = plate.replace(/\s/g, '').toUpperCase();
+        localStorage.setItem('vehicleNumberPlate', cleanPlate);
+        localStorage.setItem('vehicleNumberPlateTimestamp', new Date().toISOString());
+    } else {
+        localStorage.removeItem('vehicleNumberPlate');
+        localStorage.removeItem('vehicleNumberPlateTimestamp');
+    }
+}
+
+vehicleNumberPlate.addEventListener('input', function(e) {
+    this.value = this.value.toUpperCase();
+    const validation = validateNumberPlate(this.value);
+    showPlateValidation(validation.valid, validation.message);
+});
+
+vehicleNumberPlate.addEventListener('blur', function() {
+    const validation = validateNumberPlate(this.value);
+    if (validation.valid) {
+        saveNumberPlate(this.value);
+    }
+});
+
+document.addEventListener('DOMContentLoaded', loadSavedNumberPlate);
+
+// ============================================
+// AUTO-CAPTURE & MOTION DETECTION
+// ============================================
+
+function detectMotion() {
+    if (!webcam.videoWidth || !webcam.videoHeight || isProcessing) {
+        motionDetectedTime = null;
+        return false;
+    }
+
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = webcam.videoWidth;
+    tempCanvas.height = webcam.videoHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(webcam, 0, 0);
+    
+    const currentFrameData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    
+    if (!lastFrameData) {
+        lastFrameData = currentFrameData;
+        motionDetectedTime = null;
+        return false;
+    }
+    
+    // Compare pixels (only check center area where vehicle would be)
+    const width = tempCanvas.width;
+    const height = tempCanvas.height;
+    
+    // Focus on center 60% of the frame to avoid edge motion
+    const xStart = Math.floor(width * 0.2);
+    const xEnd = Math.floor(width * 0.8);
+    const yStart = Math.floor(height * 0.2);
+    const yEnd = Math.floor(height * 0.8);
+    
+    let diffCount = 0;
+    let checkedPixels = 0;
+    
+    for (let y = yStart; y < yEnd; y++) {
+        for (let x = xStart; x < xEnd; x++) {
+            const i = (y * width + x) * 4;
+            const diff = Math.abs(currentFrameData.data[i] - lastFrameData.data[i]) +
+                         Math.abs(currentFrameData.data[i+1] - lastFrameData.data[i+1]) +
+                         Math.abs(currentFrameData.data[i+2] - lastFrameData.data[i+2]);
+            
+            if (diff > motionThreshold) {
+                diffCount++;
+            }
+            checkedPixels++;
+        }
+    }
+    
+    lastFrameData = currentFrameData;
+    
+    // If more than 6% of checked pixels changed, consider it significant motion
+    const motionPercentage = (diffCount / checkedPixels) * 100;
+    
+    if (motionPercentage > 6) {
+        if (!motionDetectedTime) {
+            motionDetectedTime = Date.now();
+        }
+        return true;
+    } else {
+        motionDetectedTime = null;
+        return false;
+    }
+}
+
+function showDetectionStatus(message, type = 'info') {
+    detectionStatus.style.display = 'block';
+    detectionText.textContent = message;
+    
+    if (type === 'detecting') {
+        detectionStatus.style.backgroundColor = 'rgba(59, 130, 246, 0.2)';
+        detectionStatus.style.color = '#3b82f6';
+        detectionStatus.style.border = '2px solid #3b82f6';
+    } else if (type === 'capturing') {
+        detectionStatus.style.backgroundColor = 'rgba(16, 185, 129, 0.2)';
+        detectionStatus.style.color = '#10b981';
+        detectionStatus.style.border = '2px solid #10b981';
+    } else if (type === 'waiting') {
+        detectionStatus.style.backgroundColor = 'rgba(245, 158, 11, 0.2)';
+        detectionStatus.style.color = '#f59e0b';
+        detectionStatus.style.border = '2px solid #f59e0b';
+    }
+}
+
+function hideDetectionStatus() {
+    detectionStatus.style.display = 'none';
+}
+
+async function performAutoCapture() {
+    if (isProcessing) return;
+    
+    // Check if motion has been stable for required duration
+    if (!motionDetectedTime || (Date.now() - motionDetectedTime) < motionStableDelay) {
+        // Motion just started or not stable yet, wait for vehicle to stop moving
+        showDetectionStatus('🚗 Vehicle detected - waiting for stability...', 'detecting');
+        return;
+    }
+    
+    isProcessing = true;
+    showDetectionStatus('📸 Capturing and analyzing...', 'capturing');
+    
+    // Capture and analyze - single API call
+    const result = await captureAndAnalyze();
+    
+    // Check if windows were detected
+    if (!result || result.windows_detected === 0) {
+        // No windows found, continue monitoring
+        showDetectionStatus('❌ No car windows found - continue monitoring...', 'detecting');
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    } else {
+        // Windows detected! Show success and wait before next capture
+        showDetectionStatus(`✅ ${result.windows_detected} window(s) detected! Fine: Based on ${result.tinted_windows} tinted`, 'capturing');
+        await new Promise(resolve => setTimeout(resolve, captureDelay));
+    }
+    
+    // Reset motion detection
+    motionDetectedTime = null;
+    lastFrameData = null;
+    isProcessing = false;
+}
+
+function startAutoCapture() {
+    if (autoCaptureInterval) {
+        stopAutoCapture();
+    }
+    
+    showDetectionStatus('👀 Auto-detection active - monitoring for vehicles...', 'detecting');
+    motionDetectedTime = null;
+    lastFrameData = null;
+    
+    autoCaptureInterval = setInterval(() => {
+        if (autoCapture.checked && !isProcessing) {
+            if (detectMotion()) {
+                performAutoCapture();
+            }
+        }
+    }, 600); // Check every 600ms for balanced performance
+}
+
+function stopAutoCapture() {
+    if (autoCaptureInterval) {
+        clearInterval(autoCaptureInterval);
+        autoCaptureInterval = null;
+    }
+    hideDetectionStatus();
+    lastFrameData = null;
+    motionDetectedTime = null;
+    isProcessing = false;
+}
+
+autoCapture.addEventListener('change', function() {
+    if (this.checked && stream) {
+        startAutoCapture();
+    } else {
+        stopAutoCapture();
+    }
+});
+
+// ============================================
+// WEBCAM FUNCTIONALITY
+// ============================================
+
+startBtn.addEventListener('click', async () => {
+    try {
+        // Request highest quality video stream available
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1920, min: 1280 },
+                height: { ideal: 1080, min: 720 },
+                facingMode: 'environment', // Prefer back camera for vehicle detection
+                frameRate: { ideal: 30 },
+                aspectRatio: { ideal: 16/9 }
+            } 
+        });
+        webcam.srcObject = stream;
+        await webcam.play();
+        
+        // Hide placeholder and show detection guide
+        document.getElementById('webcamPlaceholder').style.display = 'none';
+        document.getElementById('detectionGuide').style.display = 'block';
+        
+        startBtn.disabled = true;
+        captureBtn.disabled = false;
+        stopBtn.disabled = false;
+        
+        // Start auto-capture if checkbox is checked
+        if (autoCapture.checked) {
+            startAutoCapture();
+        }
+    } catch (err) {
+        console.error('Webcam error:', err);
+        alert('Unable to access webcam. Please ensure:\n1. You granted camera permissions\n2. No other application is using the camera\n3. Your device has a working webcam\n\nError: ' + err.message);
+    }
+});
+
+stopBtn.addEventListener('click', () => {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        webcam.srcObject = null;
+    }
+    
+    // Show placeholder and hide detection guide
+    document.getElementById('webcamPlaceholder').style.display = 'flex';
+    document.getElementById('detectionGuide').style.display = 'none';
+    
+    stopAutoCapture();
+    startBtn.disabled = false;
+    captureBtn.disabled = true;
+    stopBtn.disabled = true;
+});
+
+async function captureAndAnalyze() {
+    // Validate number plate before capture
+    const plateValue = vehicleNumberPlate.value.trim();
+    const plateValidation = validateNumberPlate(plateValue);
+    
+    if (!plateValidation.valid && plateValue !== '') {
+        showPlateValidation(false, plateValidation.message);
+        return null;
+    }
+    
+    // Save number plate to localStorage if valid
+    if (plateValidation.valid && plateValue) {
+        saveNumberPlate(plateValue);
+    }
+
+    // Set canvas to capture at native webcam resolution for best quality
+    canvas.width = webcam.videoWidth;
+    canvas.height = webcam.videoHeight;
+    const ctx = canvas.getContext('2d');
+    
+    // Draw the image normally
+    ctx.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+    
+    // Apply light image enhancement for better detection (optimized for speed)
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Light contrast boost only (minimal processing)
+    const contrastFactor = 1.1;
+    const brightnessFactor = 5;
+    
+    for (let i = 0; i < data.length; i += 4) {
+        // Apply minimal contrast
+        data[i] = Math.min(255, Math.max(0, contrastFactor * (data[i] - 128) + 128 + brightnessFactor));     // R
+        data[i+1] = Math.min(255, Math.max(0, contrastFactor * (data[i+1] - 128) + 128 + brightnessFactor)); // G
+        data[i+2] = Math.min(255, Math.max(0, contrastFactor * (data[i+2] - 128) + 128 + brightnessFactor)); // B
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+
+    document.getElementById('loadingCard').style.display = 'block';
+    document.getElementById('resultsCard').style.display = 'none';
+    document.getElementById('errorCard').style.display = 'none';
+
+    try {
+        // Use balanced quality JPEG encoding (92% is good balance of quality vs speed)
+        const imageDataURL = canvas.toDataURL('image/jpeg', 0.92);
+        
+        const response = await fetch('{{ url_for("main.test_webcam") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ image: imageDataURL })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Show message if any
+            if (data.message) {
+                if (window.App && window.App.toast) {
+                    window.App.toast.info(data.message);
+                } else {
+                    console.log(data.message);
+                }
+            }
+            
+            document.getElementById('resultWindows').textContent = data.windows_detected;
+            document.getElementById('resultTinted').textContent = data.tinted_windows;
+            document.getElementById('resultClear').textContent = data.clear_windows;
+            document.getElementById('resultConfidence').style.width = (data.average_confidence * 100) + '%';
+            document.getElementById('resultConfidencePercent').textContent = (data.average_confidence * 100).toFixed(1) + '%';
+            document.getElementById('resultTime').textContent = data.processing_time + 's';
+            
+            document.getElementById('outputImage').src = data.output_path;
+            document.getElementById('downloadLink').href = data.output_path;
+
+            document.getElementById('loadingCard').style.display = 'none';
+            document.getElementById('resultsCard').style.display = 'block';
+            
+            // Return result for auto-capture to check
+            return {
+                windows_detected: data.windows_detected,
+                tinted_windows: data.tinted_windows,
+                clear_windows: data.clear_windows
+            };
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('errorCard').style.display = 'block';
+        document.getElementById('errorMessage').textContent = error.message;
+        return null;
+    }
+}
+
+captureBtn.addEventListener('click', async () => {
+    await captureAndAnalyze();
+});
+</script>
+{% endblock %}

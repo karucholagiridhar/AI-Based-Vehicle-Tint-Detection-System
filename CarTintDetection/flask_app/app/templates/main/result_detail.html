@@ -87,7 +87,7 @@
                     <div>
                         <label style="color: var(--text-dark-gray); font-weight: 600; font-size: 0.875rem;">Penalty Amount</label>
                         <p id="penaltyAmount" style="color: var(--accent-danger); font-size: 1.5rem; font-weight: 700; margin-top: 4px;">₹ 2,000 - ₹ 5,000</p>
-                        <p style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">May vary by state jurisdiction</p>
+                        <p id="penaltyNote" style="color: var(--text-muted); font-size: 0.8125rem; margin-top: 6px;">May vary by state jurisdiction</p>
                     </div>
                 </div>
             </div>
@@ -228,6 +228,26 @@ function loadVehicleDetails() {
 }
 
 /**
+ * Calculate specific fine based on tint percentage
+ * Fine is calculated based on severity: percentage of tinted windows
+ * 
+ * @param {number} tintPercentage - Percentage of tinted windows (0-100)
+ * @returns {number} - Fine amount in rupees
+ */
+function calculateFine(tintPercentage) {
+    // Fine tiers based on tint percentage severity
+    if (tintPercentage <= 25) {
+        return 500;    // Low severity: 1-25% tinted
+    } else if (tintPercentage <= 50) {
+        return 1000;   // Medium severity: 26-50% tinted
+    } else if (tintPercentage <= 75) {
+        return 2000;   // High severity: 51-75% tinted
+    } else {
+        return 5000;   // Very high severity: 76-100% tinted
+    }
+}
+
+/**
  * Determine violation status based on tint detection results
  * Violation logic: If tinted_windows > 0, it's a violation
  * 
@@ -239,16 +259,23 @@ function determineViolation(tintedWindows, totalWindows) {
     // Violation if any tinted windows are detected
     const hasViolation = tintedWindows > 0;
     
-    // Static violation details (frontend configuration)
+    // Calculate tint percentage
+    const tintPercentage = totalWindows > 0 ? (tintedWindows / totalWindows * 100) : 0;
+    
+    // Calculate specific fine based on tint percentage
+    const fineAmount = hasViolation ? calculateFine(tintPercentage) : 0;
+    
+    // Violation details with calculated fine
     const violationDetails = {
         hasViolation: hasViolation,
         type: 'Illegal Window Tint',
         legalReference: 'Motor Vehicles Act, 1988 - Section 100(2)',
         legalDescription: 'Use of tinted glass/films on vehicle windows',
-        penaltyAmount: '₹ 2,000 - ₹ 5,000',
-        penaltyNote: 'May vary by state jurisdiction',
+        penaltyAmount: hasViolation ? `₹ ${fineAmount.toLocaleString('en-IN')}` : '₹ 0',
+        penaltyNote: `Based on ${tintPercentage.toFixed(0)}% tinted windows (${tintedWindows}/${totalWindows})`,
         tintedCount: tintedWindows,
-        totalCount: totalWindows
+        totalCount: totalWindows,
+        tintPercentage: tintPercentage
     };
     
     return violationDetails;
@@ -288,6 +315,7 @@ function displayViolationSummary() {
         document.getElementById('violationType').textContent = violation.type;
         document.getElementById('legalReference').textContent = violation.legalReference;
         document.getElementById('penaltyAmount').textContent = violation.penaltyAmount;
+        document.getElementById('penaltyNote').textContent = violation.penaltyNote;
         
     } else {
         // Show COMPLIANT status (Green)
