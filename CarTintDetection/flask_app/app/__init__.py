@@ -47,5 +47,13 @@ def create_app(config_name='development'):
     def internal_error(error):
         db.session.rollback()
         return {'error': 'Internal server error'}, 500
+
+    @app.errorhandler(413)
+    def payload_too_large(error):
+        max_bytes = app.config.get('MAX_CONTENT_LENGTH')
+        max_mb = int(max_bytes / (1024 * 1024)) if max_bytes else 'configured'
+        return {
+            'error': f'File too large. Maximum upload size is {max_mb}MB.'
+        }, 413
     
     return app

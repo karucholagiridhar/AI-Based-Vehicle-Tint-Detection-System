@@ -12,7 +12,6 @@ Pillow>=10.0.0
 numpy>=2.0.0,<2.4.0
 requests>=2.32.0
 
-# Production Dependencies (optional for development)
-# Uncomment these when deploying to production
-# gunicorn==21.2.0
-# psycopg2-binary==2.9.9
+# Production Dependencies
+gunicorn==21.2.0
+psycopg2-binary==2.9.9

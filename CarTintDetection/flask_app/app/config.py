@@ -13,6 +13,10 @@ class Config:
     if SQLALCHEMY_DATABASE_URI and SQLALCHEMY_DATABASE_URI.startswith('postgres://'):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace('postgres://', 'postgresql://', 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
     
     # Session
     PERMANENT_SESSION_LIFETIME = timedelta(days=7)
@@ -21,8 +25,10 @@ class Config:
     SESSION_COOKIE_SAMESITE = os.environ.get('SESSION_COOKIE_SAMESITE', 'Lax')
     
     # Upload
-    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.path.dirname(__file__), 'static', 'uploads')
-    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 500 * 1024 * 1024))  # Default 500MB max file size
+    _default_upload = '/var/data/uploads' if os.environ.get('RENDER') == 'true' else os.path.join(os.path.dirname(__file__), 'static', 'uploads')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or _default_upload
+    # Keep default conservative to avoid platform proxy 413 responses; override via env if needed.
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))
     ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'mp4', 'avi', 'mov', 'mkv'}
     
     # API - Use environment variables with fallback to development values
