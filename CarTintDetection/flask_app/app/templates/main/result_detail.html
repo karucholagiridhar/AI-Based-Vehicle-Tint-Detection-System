@@ -148,10 +148,14 @@
         <div class="card">
             <h2 style="color: var(--accent-green); margin-bottom: 20px;">🎨 Annotated Output</h2>
             {% if result.output_path %}
+                <!-- Debug info -->
+                <p style="color: var(--text-dark-gray); font-size: 12px;">Debug: output_path="{{ result.output_path }}"</p>
+                <p style="color: var(--text-dark-gray); font-size: 12px;">Generated URL: {{ url_for('main.get_image', filename=result.output_path) }}</p>
+                
                 <div style="background-color: var(--primary-darker); border-radius: 8px; overflow: hidden; margin-bottom: 16px;">
-                    <img src="{{ url_for('main.get_image', filename=result.output_path.split('/')[-1]) }}" alt="Output" style="width: 100%; display: block;">
+                    <img src="{{ url_for('main.get_image', filename=result.output_path) }}" alt="Output" style="width: 100%; display: block;">
                 </div>
-                <a href="{{ url_for('main.get_image', filename=result.output_path.split('/')[-1]) }}" download class="btn btn-secondary btn-block">
+                <a href="{{ url_for('main.get_image', filename=result.output_path) }}" download class="btn btn-secondary btn-block">
                     ⬇️ Download Output
                 </a>
             {% else %}

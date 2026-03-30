@@ -433,3 +433,14 @@ For questions, issues, or feature requests, please contact the development team.
 - 🔄 [Refactoring Guide](REFACTORING_GUIDE.md)
 
 **Built with ❤️ for professional tint detection and enforcement**
+** THESE ARE THE STEPS TO RUN
+first go to your file path like:
+    cd c:\projects\CarTitntDetection
+next activate Python virtual environment:
+    .\.venv\Scripts\Activate
+Navigate into the Flask application folder
+    cd CarTintDetection\flask_app
+Ensure all dependencies are installed
+    pip install -r requirements.txt
+Start the local server
+    python run.py

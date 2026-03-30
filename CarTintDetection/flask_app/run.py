@@ -40,8 +40,10 @@ if __name__ == '__main__':
         # Ensure tables exist
         db.create_all()
     
+    # Run without debug reloader to avoid scipy import issues
     app.run(
         host='0.0.0.0',
         port=5000,
-        debug=True
+        debug=True,
+        use_reloader=False  # Disable reloader to prevent scipy import errors
     )

@@ -3,10 +3,6 @@ from app.models import db
 from app.config import config_by_name
 import os
 
-# Register PyMySQL as MySQLdb for SQLAlchemy
-import pymysql
-pymysql.install_as_MySQLdb()
-
 
 def create_app(config_name='development'):
     """Application factory"""
